@@ -19,6 +19,26 @@ namespace QbuzSimulation
         public TramStartEvent(int time) : base("TramLeave", time) { }
     }
 
+    public class TramPassengersExitEvent : Event
+    {
+        public TramPassengersExitEvent(int time) : base("TramPassengersExit", time) {}
+    }
+
+    public class TramPassengersEnterEvent : Event
+    {
+        public TramPassengersEnterEvent(int time) : base("TramPassengersEnter", time) { }
+    }
+
+    public class TramChangeTrackEvent : Event
+    {
+        public TramStop NewRoute { get; }
+        public TramChangeTrackEvent(int time, TramStop newRoute) 
+            : base("TramChangeTrackEvent", time)
+        {
+            NewRoute = newRoute;
+        }
+    }
+
     //TODO Meer events toevoegen in het systeem
 
     public abstract class Event

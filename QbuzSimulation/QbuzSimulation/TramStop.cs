@@ -12,6 +12,8 @@ namespace QbuzSimulation
         public string Name { get; set; }
         public int AvgTimeToNextDestination { get; set; }
         public TramStop NextStop { get; set; }
-        public int Passengers { get; set; }
+        public bool IsEndPoint { get; set; }
+        public List<Passenger> Passengers = new List<Passenger>(); 
+        public int Route { get; set; }
     }
 }
