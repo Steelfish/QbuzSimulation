@@ -1,7 +1,7 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
-
 
 namespace QbuzzSimulation
 {
@@ -17,6 +17,8 @@ namespace QbuzzSimulation
         private int _maxTime;
         private int _f;
         private int _q;
+
+        private string[][] passengerData = LoadCsv("/Data/Input/12a.csv");
 
         private int _time;
         private int _route1TimeTable;
@@ -172,6 +174,13 @@ namespace QbuzzSimulation
                 r--;
             }
             return destination.Name;
+        }
+
+        /// Load a CSV file into an array of rows and columns.
+        /// Source: https://stackoverflow.com/questions/23292089/csv-file-contents-to-two-dimensional-array
+        public static string[][] LoadCsv(string filename)
+        {
+            return File.ReadAllLines(filename).Select(l => l.Split(',').ToArray()).ToArray();
         }
     }
 
