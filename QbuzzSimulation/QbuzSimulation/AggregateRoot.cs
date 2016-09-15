@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace QbuzSimulation
+namespace QbuzzSimulation
 {
     //Basis klasse om events op te slaan en de passende apply methode aan te roepen
     public abstract class AggregateRoot

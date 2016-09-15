@@ -5,7 +5,7 @@ using System.Dynamic;
 using System.Linq;
 using System.Reflection;
 
-namespace QbuzSimulation
+namespace QbuzzSimulation
 {
 
     //In principe heleboel code om private methode als dynamic te kunnen aanroepen zodat AggregateRoot de apply's van zijn superklassen kan aanroepen.

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace QbuzSimulation
+namespace QbuzzSimulation
 {
     //Tram klasse om trams te simuleren
     public class Tram: AggregateRoot

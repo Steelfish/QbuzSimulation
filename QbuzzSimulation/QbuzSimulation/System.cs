@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 
-namespace QbuzSimulation
+namespace QbuzzSimulation
 {
     //System klasse die verantwoordelijk is voor het draaien van de simulatie
     public class System

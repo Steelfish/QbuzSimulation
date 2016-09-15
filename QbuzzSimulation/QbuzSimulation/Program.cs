@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace QbuzSimulation
+namespace QbuzzSimulation
 {
     class Program
     {

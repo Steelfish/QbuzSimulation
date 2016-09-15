@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QbuzSimulation", "QbuzSimulation\QbuzSimulation.csproj", "{B4F4ABF5-E0A5-4D04-902E-A026D1164FF0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QbuzzSimulation", "QbuzSimulation\QbuzzSimulation.csproj", "{B4F4ABF5-E0A5-4D04-902E-A026D1164FF0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
