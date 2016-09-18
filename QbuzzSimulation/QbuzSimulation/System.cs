@@ -11,7 +11,8 @@ namespace QbuzzSimulation
 
         private readonly Random _random = new Random();
         private readonly List<Tram> _trams = new List<Tram>();
-        private readonly List<Passenger> _passengers = new List<Passenger>(); 
+        private readonly List<Passenger> _passengers = new List<Passenger>();
+        private List<Event> _eventList = new List<Event>();
 
         //Run input
         private int _maxTime;
@@ -89,8 +90,22 @@ namespace QbuzzSimulation
             var trams = (34 + _q) / (60 / _f);
             _trams.Add(new Tram(_route1, _q));
             _trams.Add(new Tram(_route2, _q));
+
+            ScheduleEvent("SimulationStart", 0, 0);
+            Event nextEvent = getNextEvent();
+
             while (_time < _maxTime)
             {
+                if (nextEvent.Name == "SimulationStart")
+                {
+                    // TODO add random duration intervals
+                    ScheduleEvent("PassengerArrival", _time, 1);
+                    foreach (var tram in _trams)
+                    {
+                        ScheduleEvent("TramStart", _time, 1);
+                    }
+                }
+
                 //Handel trams af
                 foreach (var tram in _trams)
                 {
@@ -99,7 +114,7 @@ namespace QbuzzSimulation
 
                 AddPassengersToRoute(_route1);
                 AddPassengersToRoute(_route2);
-                _time += 1;
+                _time = nextEvent.TimeStamp;
             }
 
             Console.WriteLine();
@@ -107,6 +122,24 @@ namespace QbuzzSimulation
             Console.WriteLine("Total passenger wait time: {0}", _passengers.Where(p => p.WaitTime >= 0).Sum(p => p.WaitTime));
             Console.WriteLine("Total passengers: {0}", _passengers.Count);
             Console.WriteLine("Avg. waittime / passenger: {0}", _passengers.Where(p => p.WaitTime >= 0).Average(p => p.WaitTime));
+        }
+
+        private void ScheduleEvent(string name, int time, int duration)
+        {
+            //TODO schedule event based on name
+            Event e = new TramStartEvent(time+duration);
+            _eventList.Add(e);
+            // Sort the eventlist by ascending timestamp, so that the next event is always first in the list.
+            _eventList = _eventList.OrderBy(o => o.TimeStamp).ToList();
+        }
+
+        private Event getNextEvent()
+        {
+            if (!_eventList.Any()) throw new NullReferenceException("The eventlist is empty.");
+             
+            Event e = _eventList[0];
+            _eventList.RemoveAt(0);
+            return e;
         }
 
         private void Operate(Tram tram)

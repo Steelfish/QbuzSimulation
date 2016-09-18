@@ -9,6 +9,11 @@ namespace QbuzzSimulation
 {
     //Events die kunnen gebeuren in het systeem
 
+    public class SimulationStartEvent : Event
+    {
+        public SimulationStartEvent(int time) : base("SimulationStart", time) { }
+    }
+
     public class TramStopEvent : Event
     {
        public TramStopEvent(int time) : base("TramStop", time) { }
@@ -17,6 +22,11 @@ namespace QbuzzSimulation
     public class TramStartEvent : Event
     {
         public TramStartEvent(int time) : base("TramLeave", time) { }
+    }
+
+    public class PassengersArrivalEvent : Event
+    {
+        public PassengerArrivalEvent(int time) : base("PassengerArrival", time) { }
     }
 
     public class TramPassengersExitEvent : Event
