@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QbuzzSimulation
 {
@@ -10,7 +6,8 @@ namespace QbuzzSimulation
     {
         private readonly int _arrivalTime;
         private int _boardTime;
-        public int WaitTime => _boardTime - _arrivalTime;
+        public bool Participated => _boardTime != 0;
+        public int WaitTime => Math.Max(0, _boardTime - _arrivalTime);
         public string Destination { get; private set; }
 
         public Passenger(int arrivalTime, string destination)

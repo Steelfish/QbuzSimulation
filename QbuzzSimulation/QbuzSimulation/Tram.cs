@@ -8,87 +8,58 @@ namespace QbuzzSimulation
     //Tram klasse om trams te simuleren
     public class Tram: AggregateRoot
     {
-        public bool AtEndPoint => _destination.IsEndPoint && DeltaT == 0;
-        public int Route => _destination.Route;
+        public bool AtEndPoint => Destination.IsEndPoint;
+        public int Route => Destination.Route;
         public bool Driving { get; private set; }
-        public bool EnRoute { get; private set; }
         public int DeltaT { get; set; }
+        public int TimeToSpare { get; set; }
 
-        private TramStop _destination;
+        public TramStop Destination { get; set; }
         private List<Passenger> _passengers = new List<Passenger>();
         private readonly int _turnAroundTime;
 
         public Tram(TramStop start, int turnAroundTime)
         {
-            _destination = start;
+            Destination = start;
             _turnAroundTime = turnAroundTime;
         }
 
-        //Apply methoden om verschillende events af te handelen
-        private void Apply(TramPassengersExitEvent @event)
+        private void Apply(TramEstimatedStartEvent @event)
         {
-            DeltaT += _passengers.Where(p => p.Destination == _destination.Name).Sum(p => p.Exit());
-            _passengers = _passengers.Where(p => p.Destination != _destination.Name).ToList();
-        }
-
-        private void Apply(TramPassengersEnterEvent @event)
-        {
-            DeltaT += _destination.Passengers.Sum(p => p.Enter(@event.TimeStamp));
-            _passengers.AddRange(_destination.Passengers);
-            _destination.Passengers.Clear();
+            //Pick up any additional passengers that may have arrived
+            DeltaT = Destination.Passengers.Sum(p => p.Enter(@event.TimeStamp - TimeToSpare));
+            _passengers.AddRange(Destination.Passengers);
+            Destination.Passengers.Clear();
+            TimeToSpare = 0;
         }
 
         private void Apply(TramStartEvent @event)
         {
-            PassengersEnter(@event.TimeStamp);
+            if (Driving) throw new InvalidOperationException("Can't start Tram that's already driving.");
+            if (Destination.IsEndPoint) throw new InvalidOperationException("Can't start Tram on endpoint.");
+            DeltaT = Destination.AvgTimeToNextDestination;
             Driving = true;
-            EnRoute = true;
-            DeltaT += _destination.AvgTimeToNextDestination;
-            _destination = _destination.NextStop;
+            Destination = Destination.NextStop;
         }
 
         private void Apply(TramStopEvent @event)
         {
+            if (!Driving) throw new InvalidOperationException("Can't stop Tram that's not driving.");
             Driving = false;
-            EnRoute = !AtEndPoint;
-            PassengersExit(@event.TimeStamp);
+            //Uitstappen passagiers
+            DeltaT = _passengers.Where(p => p.Destination == Destination.Name).Sum(p => p.Exit());
+            _passengers = _passengers.Where(p => p.Destination != Destination.Name).ToList();
+            //Instappen nieuwe passagiers
+            DeltaT += Destination.Passengers.Sum(p => p.Enter(@event.TimeStamp + DeltaT));
+            _passengers.AddRange(Destination.Passengers);
+            Destination.Passengers.Clear();
         }
 
         private void Apply(TramChangeTrackEvent @event)
         {
-            _destination = @event.NewRoute;
+            if (!AtEndPoint) throw new InvalidOperationException("Can only change tracks at end points of route.");
+            Destination = @event.NewRoute;
             DeltaT += _turnAroundTime;
         }
-
-        public void Start(int time)
-        {
-            if(Driving) throw new InvalidOperationException("Can't start Tram that's already driving.");
-            ApplyChange(new TramStartEvent(time));
-        }
-
-        public void PassengersEnter(int time)
-        {
-            if (Driving) throw new InvalidOperationException("Can't accept passengers on a Tram that's driving.");
-            ApplyChange(new TramPassengersEnterEvent(time));
-        }
-
-        public void PassengersExit(int time)
-        {
-            if (Driving) throw new InvalidOperationException("Can't let out passengers on a Tram that's driving.");
-            ApplyChange(new TramPassengersExitEvent(time));
-        }
-
-        public void Stop(int time)
-        {
-            if (!Driving) throw new InvalidOperationException("Can't stop Tram that's not driving.");
-            ApplyChange(new TramStopEvent(time));
-        }
-
-        public void ChangeTrack(int time, TramStop newRoute)
-        {
-            if (!AtEndPoint) throw new InvalidOperationException("Can only change tracks at end points of route.");
-            ApplyChange(new TramChangeTrackEvent(time, newRoute));
-        }
-
     }
 }

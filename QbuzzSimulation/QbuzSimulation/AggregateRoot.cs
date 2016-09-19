@@ -13,7 +13,7 @@ namespace QbuzzSimulation
         private readonly List<Event> _events = new List<Event>();
         public readonly Guid Id = Guid.NewGuid();
 
-        protected void ApplyChange(Event @event)
+        public void ApplyChange(Event @event)
         {
             ApplyChange(@event, true);
         }

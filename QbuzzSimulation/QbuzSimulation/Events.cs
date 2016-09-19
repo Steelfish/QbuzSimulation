@@ -11,39 +11,46 @@ namespace QbuzzSimulation
 
     public class SimulationStartEvent : Event
     {
-        public SimulationStartEvent(int time) : base("SimulationStart", time) { }
+        public new const string Name = "SimulationStart";
+        public SimulationStartEvent(int time) : base(Name, time) { }
+    }
+
+    public class PassengerArrivalEvent : Event
+    {
+        public new const string Name = "PassengerArrival";
+        public PassengerArrivalEvent(int time): base(Name, time) { }
     }
 
     public class TramStopEvent : Event
     {
-       public TramStopEvent(int time) : base("TramStop", time) { }
+        public new const string Name = "TramStop";
+        public TramStopEvent(int time) : base(Name, time) { }
+    }
+
+    public class TramEstimatedStartEvent : Event
+    {
+        public new const string Name = "TramEstimatedStart";
+        public TramEstimatedStartEvent(int time) : base(Name, time) {}
     }
 
     public class TramStartEvent : Event
     {
-        public TramStartEvent(int time) : base("TramLeave", time) { }
-    }
-
-    public class PassengersArrivalEvent : Event
-    {
-        public PassengerArrivalEvent(int time) : base("PassengerArrival", time) { }
-    }
-
-    public class TramPassengersExitEvent : Event
-    {
-        public TramPassengersExitEvent(int time) : base("TramPassengersExit", time) {}
+        public new const string Name = "TramLeave";
+        public TramStartEvent(int time) : base(Name, time) { }
     }
 
     public class TramPassengersEnterEvent : Event
     {
-        public TramPassengersEnterEvent(int time) : base("TramPassengersEnter", time) { }
+        public new const string Name = "TramPassengersEnter";
+        public TramPassengersEnterEvent(int time) : base(Name, time) { }
     }
 
     public class TramChangeTrackEvent : Event
     {
+        public new const string Name = "TramChangeTrackEvent";
         public TramStop NewRoute { get; }
-        public TramChangeTrackEvent(int time, TramStop newRoute) 
-            : base("TramChangeTrackEvent", time)
+        public TramChangeTrackEvent(int time, TramStop newRoute)
+            : base(Name, time)
         {
             NewRoute = newRoute;
         }
