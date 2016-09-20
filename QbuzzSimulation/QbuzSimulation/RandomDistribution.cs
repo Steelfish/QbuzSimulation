@@ -22,6 +22,41 @@ namespace QbuzzSimulation
         }
 
         /// <summary>
+        /// Generate a next item based on the weights of each item.
+        /// Uses a weighted selection wheel.
+        /// </summary>
+        /// <param name="items"></param>
+        /// <returns></returns>
+        public static double GenerateNextEmpirical(float[] items)
+        {
+            Random rnd = new Random();
+            double randomValue = rnd.NextDouble();
+
+            int n = items.Length;
+
+            float total = 0;
+            foreach (float item in items)
+            {
+                total += item;
+            }
+
+            float[] probabilities = new float[n];
+            for (int i = 0; i < n; i++)
+            {
+                probabilities[i] = items[i] / total;
+            }
+            
+            int index = 0;
+            float sum = probabilities[0];
+            while (randomValue <= sum)
+            {
+                index++;
+                sum += probabilities[index];
+            }
+            return items[index];
+        }
+
+        /// <summary>
         /// Generate a next Poisson number based on an average rate parameter.
         /// http://preshing.com/20111007/how-to-generate-random-timings-for-a-poisson-process/
         /// </summary>
