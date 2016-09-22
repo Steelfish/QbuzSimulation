@@ -46,11 +46,12 @@ namespace QbuzzSimulation
         {
             if (!Driving) throw new InvalidOperationException("Can't stop Tram that's not driving.");
             Driving = false;
+            DeltaT = CalculateStopDelay();
             //Uitstappen passagiers
-            DeltaT = _passengers.Where(p => p.Destination == Destination.Name).Sum(p => p.Exit());
+            int exitTime = _passengers.Where(p => p.Destination == Destination.Name).Sum(p => p.Exit());
             _passengers = _passengers.Where(p => p.Destination != Destination.Name).ToList();
             //Instappen nieuwe passagiers
-            DeltaT += Destination.Passengers.Sum(p => p.Enter(@event.TimeStamp + DeltaT));
+            int entryTime = Destination.Passengers.Sum(p => p.Enter(@event.TimeStamp + DeltaT));
             _passengers.AddRange(Destination.Passengers);
             Destination.Passengers.Clear();
         }
@@ -60,6 +61,21 @@ namespace QbuzzSimulation
             if (!AtEndPoint) throw new InvalidOperationException("Can only change tracks at end points of route.");
             Destination = @event.NewRoute;
             DeltaT += _turnAroundTime;
+        }
+
+        private int CalculateStopDelay()
+        {
+            int passengersIn = 0;
+            int passengersOut = _passengers.Where(p => p.Destination == Destination.Name).Count();
+            int passengersTransfer = _passengers.Count - passengersOut;
+
+            // QBuzz style delay calculation.
+            //int delay = 12.5 + 0.22 * passengersIn + 0.13 * passengersOut;
+
+            // Literature style delay calculation.
+            int delay = (int)(2.3E-5 * passengersTransfer * (passengersIn + passengersOut));
+
+            return delay;
         }
     }
 }
