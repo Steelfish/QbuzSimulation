@@ -72,6 +72,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Data\Input\input-data-passengers-01.csv" />
     <None Include="Data\Input\12a.csv" />
     <None Include="Data\Input\12b.csv" />
     <None Include="Data\Input\passengerprognose.xlsx" />
