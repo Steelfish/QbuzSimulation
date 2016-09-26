@@ -123,7 +123,9 @@ namespace QbuzzSimulation
                     {
                         //TODO omgaan met eindpunten
                        if (tram.Destination.Occupied)
-                            tram.Destination.WaitList.Add(tram); 
+                            tram.Destination.WaitList.Add(tram);
+                       else
+                            ScheduleEvent(new TramStopEvent(_time + tram.DeltaT), tram);
                     }
                     else
                         ScheduleEvent(new TramStartEvent(_time + tram.DeltaT), tram);
