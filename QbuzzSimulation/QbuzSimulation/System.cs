@@ -8,8 +8,6 @@ namespace QbuzzSimulation
     //System klasse die verantwoordelijk is voor het draaien van de simulatie
     public class System
     {
-
-        private readonly Random _random = new Random();
         private readonly List<Tram> _trams = new List<Tram>();
         private readonly List<Passenger> _passengers = new List<Passenger>();
         private List<ScheduledEvent> _eventList = new List<ScheduledEvent>();
@@ -59,8 +57,6 @@ namespace QbuzzSimulation
             }
             _ridesRoute1 = 0;
             _ridesRoute2 = 0;
-            //Todo Schedule Passenger arrival
-
             var nextEvent = GetNextEvent();
             while (nextEvent.Event.TimeStamp < _maxTime)
             {
@@ -93,7 +89,7 @@ namespace QbuzzSimulation
             switch (@event.Name)
             {
                 case TramEstimatedStartEvent.Name:
-                    if (tram.DeltaT > tram.TimeToSpare)
+                    if (tram.DeltaT > 0 && tram.Destination.WaitList.Count == 0)
                     {
                         ScheduleEvent(new TramEstimatedStartEvent(_time + tram.DeltaT), tram);
                     }
@@ -113,7 +109,24 @@ namespace QbuzzSimulation
                     break;
                     //Might be redundant.
                 case TramStartEvent.Name:
-                    ScheduleEvent(new TramStopEvent(_time + tram.DeltaT), tram);
+                    ScheduleEvent(new TramEstimatedStopEvent(_time + tram.DeltaT), tram);
+                    var waitingTram = tram.Previous.WaitList.FirstOrDefault();
+                    if (waitingTram != null)
+                    {
+                        //TODO 40 seconden wordt nu hier verwerkt. Moet eigenlijk in starten en stoppen van trams?
+                        ScheduleEvent(new TramStopEvent(_time + 40), tram);
+                        tram.Previous.WaitList.Remove(tram);
+                    }
+                    break;
+                case TramEstimatedStopEvent.Name:
+                    if (tram.ShouldStop)
+                    {
+                        //TODO omgaan met eindpunten
+                       if (tram.Destination.Occupied)
+                            tram.Destination.WaitList.Add(tram); 
+                    }
+                    else
+                        ScheduleEvent(new TramStartEvent(_time + tram.DeltaT), tram);
                     break;
                 case TramStopEvent.Name:
                     if (tram.AtEndPoint)

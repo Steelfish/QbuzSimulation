@@ -9,17 +9,27 @@ namespace QbuzzSimulation
     public class Tram: AggregateRoot
     {
         public bool AtEndPoint => Destination.IsEndPoint;
+
+        public bool ShouldStop => AtEndPoint || Destination.Occupied
+                               || _passengers.Count(p => p.Destination == Destination.Name) > 0;
         public int Route => Destination.Route;
+
         public bool Driving { get; private set; }
         public int DeltaT { get; set; }
         public int TimeToSpare { get; set; }
-
+        public TramStop Previous { get; set; }
         public TramStop Destination { get; set; }
         private List<Passenger> _passengers = new List<Passenger>();
         private readonly int _turnAroundTime;
 
+        private const double AccelerationSpeed = 1.2;
+        private const double DecelerationSpeed = 1.2;
+        private const double MaxSpeed = 70000.0/3600.0;
+
+        private double _velocity = 0;
         public Tram(TramStop start, int turnAroundTime)
         {
+            Previous = start;
             Destination = start;
             _turnAroundTime = turnAroundTime;
         }
@@ -27,7 +37,7 @@ namespace QbuzzSimulation
         private void Apply(TramEstimatedStartEvent @event)
         {
             //Pick up any additional passengers that may have arrived
-            DeltaT = Destination.Passengers.Sum(p => p.Enter(@event.TimeStamp - TimeToSpare));
+            DeltaT = CalculateStopDelay() - TimeToSpare;
             _passengers.AddRange(Destination.Passengers);
             Destination.Passengers.Clear();
             TimeToSpare = 0;
@@ -37,9 +47,50 @@ namespace QbuzzSimulation
         {
             if (Driving) throw new InvalidOperationException("Can't start Tram that's already driving.");
             if (Destination.IsEndPoint) throw new InvalidOperationException("Can't start Tram on endpoint.");
-            DeltaT = Destination.AvgTimeToNextDestination;
+            foreach (var passenger in _passengers.Where(p => p.Stop == Destination.Name))
+            {
+                passenger.Enter(@event.TimeStamp);
+            }
+            var maxVelocity = Math.Min(MaxSpeed, CalculateMaxSpeed(Destination.DistanceToNextStop));
+            var accelerationTime = CalculateTime(_velocity, maxVelocity, AccelerationSpeed);
+            var accelerationDistance = CalculateDistance(_velocity, maxVelocity, AccelerationSpeed);
+            var decelerationDistance = CalculateDistance(0, maxVelocity, DecelerationSpeed);
+            var maxSpeedTime = Math.Max(0, (Destination.DistanceToNextStop - accelerationDistance - decelerationDistance)/
+                               maxVelocity);
+            DeltaT = (int)Math.Floor(accelerationTime + maxSpeedTime);
             Driving = true;
+            Destination.Occupied = false;
+            Previous = Destination;
             Destination = Destination.NextStop;
+        }
+
+        private void Apply(TramEstimatedStopEvent @event)
+        {
+            if (ShouldStop)
+                DeltaT = (int) Math.Ceiling(CalculateTime(0, _velocity, DecelerationSpeed));
+            else
+            {
+                var distance = CalculateDistance(0, _velocity, DecelerationSpeed);
+                if (Math.Abs(_velocity - MaxSpeed) < 0.01)
+                    DeltaT = (int) Math.Ceiling(distance/_velocity);
+                else
+                {
+                    var accelerationTime = CalculateTime(_velocity, MaxSpeed, AccelerationSpeed);
+                    var accelerationDistance = CalculateDistance(_velocity, MaxSpeed, AccelerationSpeed);
+                    if (accelerationDistance < distance)
+                    {
+                        var maxSpeedTime = Math.Max(0, (distance - accelerationDistance)/MaxSpeed);
+                        DeltaT = (int) Math.Ceiling(accelerationTime + maxSpeedTime);
+                        _velocity = MaxSpeed;
+                    }
+                    else
+                    {
+                        DeltaT = (int)Math.Round((Math.Sqrt(Math.Pow(_velocity, 2) - 2 * AccelerationSpeed * distance) - _velocity) / AccelerationSpeed);
+                        _velocity = _velocity + AccelerationSpeed * DeltaT;
+                    }
+                }
+            }
+                
         }
 
         private void Apply(TramStopEvent @event)
@@ -48,34 +99,52 @@ namespace QbuzzSimulation
             Driving = false;
             DeltaT = CalculateStopDelay();
             //Uitstappen passagiers
-            int exitTime = _passengers.Where(p => p.Destination == Destination.Name).Sum(p => p.Exit());
             _passengers = _passengers.Where(p => p.Destination != Destination.Name).ToList();
             //Instappen nieuwe passagiers
-            int entryTime = Destination.Passengers.Sum(p => p.Enter(@event.TimeStamp + DeltaT));
             _passengers.AddRange(Destination.Passengers);
             Destination.Passengers.Clear();
+            Destination.Occupied = true;
+            _velocity = 0;
         }
 
         private void Apply(TramChangeTrackEvent @event)
         {
             if (!AtEndPoint) throw new InvalidOperationException("Can only change tracks at end points of route.");
+            Previous = Destination;
             Destination = @event.NewRoute;
             DeltaT += _turnAroundTime;
         }
 
         private int CalculateStopDelay()
         {
-            int passengersIn = 0;
-            int passengersOut = _passengers.Where(p => p.Destination == Destination.Name).Count();
-            int passengersTransfer = _passengers.Count - passengersOut;
+            var passengersIn = Destination.Passengers.Count;
+            var passengersOut = _passengers.Count(p => p.Destination == Destination.Name);
+            var passengersTransfer = _passengers.Count - passengersOut;
 
             // QBuzz style delay calculation.
-            //int delay = 12.5 + 0.22 * passengersIn + 0.13 * passengersOut;
+            //return 12.5 + 0.22 * passengersIn + 0.13 * passengersOut;
 
             // Literature style delay calculation.
-            int delay = (int)(2.3E-5 * passengersTransfer * (passengersIn + passengersOut));
+            return (int)(2.3E-5 * passengersTransfer * (passengersIn + passengersOut));
+        }
 
-            return delay;
+        private double CalculateMaxSpeed(double distance)
+        {
+            return Math.Sqrt(
+                (DecelerationSpeed*_velocity*_velocity + 2*AccelerationSpeed*distance*DecelerationSpeed)
+              / (AccelerationSpeed + DecelerationSpeed)
+            );
+        }
+
+        private double CalculateTime(double v0, double v1, double a)
+        {
+            return (v1 - v0)/a;
+        }
+
+        private double CalculateDistance(double v0, double v1, double a)
+        {
+            var t = CalculateTime(v0, v1, a);
+            return v0*t + 0.5*a*t*t;
         }
     }
 }

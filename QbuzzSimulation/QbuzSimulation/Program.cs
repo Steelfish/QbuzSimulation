@@ -36,11 +36,11 @@ namespace QbuzzSimulation
             // Skip the header row.
             input = input.Skip(1).ToArray();
 
-            string[] stops = ["P+R Uithof", "WKZ", "UMC", "Heidelberglaan", "Padualaan", "Kromme Rijn", "Galgenwaard", "Vaartscherijn", "Centraal Station Centrumzijde"];
+            string[] stops = {"P+R Uithof", "WKZ", "UMC", "Heidelberglaan", "Padualaan", "Kromme Rijn", "Galgenwaard", "Vaartscherijn", "Centraal Station Centrumzijde"};
             // Direction 0 is from P+R Uithof to Centraal Station Centrumzijde, direction 1 is in the opposite direction.
-            string[] directions = ["0", "1"];
+            string[] directions = { "0", "1"};
             // Every time period is from t:00:00 until t:59:59.
-            string[] periods = ["6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21"];
+            string[] periods = { "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21"};
             //TODO all times mapped to:      To read passenger data for that timeslot
             /** 6:
                     6
@@ -68,8 +68,8 @@ namespace QbuzzSimulation
 
                         string passengersIn = input[index][4];
                         string passengersOut = input[index][5];
-                        model[stop][direction][period][in] = passengersIn;
-                        model[stop][direction][period][out] = passengersOut;
+//                        model[stop][direction][period][in] = passengersIn;
+//                        model[stop][direction][period][out] = passengersOut;
                     }
                 }
             }

@@ -9,15 +9,18 @@ namespace QbuzzSimulation
 {
     public class TramStop: AggregateRoot
     {
-        private Random _r = new Random();
+        private readonly Random _r = new Random();
 
         public string Name { get; set; }
         public int AvgTimeToNextDestination { get; set; }
+        public double DistanceToNextStop { get; set; }
         public TramStop NextStop { get; set; }
         public bool IsEndPoint { get; set; }
-        public List<Passenger> Passengers = new List<Passenger>(); 
+        public List<Passenger> Passengers = new List<Passenger>();
         public int Route { get; set; }
         public double ExitProbability { get; set; }
+        public bool Occupied { get; set; }
+        public List<Tram> WaitList { get; set; } 
 
         //Todo change to distribution that changes over time
         public int InterArrivalTime => _r.Next(0, 20);
@@ -36,7 +39,7 @@ namespace QbuzzSimulation
                 if (num < aggr)
                     break;
             }
-            Passengers.Add(new Passenger(@event.TimeStamp, stop.Name));
+            Passengers.Add(new Passenger(@event.TimeStamp, Name, stop.Name));
         }
 
         private double ProbabilityRemaining => NextStop?.ProbabilityRemaining + NextStop?.ExitProbability ?? 0;
