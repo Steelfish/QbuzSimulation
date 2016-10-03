@@ -22,15 +22,15 @@ bus_Centraal_AZU <- subset(bus_Centraal_AZU, select=-Trip)
 bus_AZU_Centraal <- aggregate(x = bus_AZU_Centraal[colnames(bus_AZU_Centraal[,3:ncol(bus_AZU_Centraal)])],
                               FUN = sum,
                               by = list(Date = bus_AZU_Centraal$Date,
-                                        Time = bus_AZU_Centraal$Departure))
+                                        Time = as.POSIXlt(strptime(bus_AZU_Centraal$Departure, format="%H:%M"))$hour)))
 
 # https://stackoverflow.com/questions/13649019/with-r-split-time-series-data-into-time-intervals-say-an-hour-and-then-plot-t
 
 
 # First sort by time and by date to have an ordering of days and their hours.
 # https://stackoverflow.com/questions/10683224/obtain-hour-from-datetime-vector
-bus_AZU_Centraal <- bus_AZU_Centraal[order(as.Date(bus_AZU_Centraal$Date,format="%d-%m-%Y"),
-                                           as.POSIXlt(bus_AZU_Centraal$Time, format="%H:%M")),,drop=FALSE]
+bus_AZU_Centraal <- bus_AZU_Centraal[order(as.Date(bus_AZU_Centraal$Date, format="%d-%m-%Y"),
+                                           as.POSIXlt(bus_AZU_Centraal$Time, format="%H:%M"),,drop=FALSE]
 
 # 
 # # Sum all passenger arrivals within an hour per day.
