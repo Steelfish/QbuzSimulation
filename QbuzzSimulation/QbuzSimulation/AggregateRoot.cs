@@ -24,5 +24,10 @@ namespace QbuzzSimulation
             this.AsDynamic().Apply(@event);
             if(isNew) _events.Add(@event);
         }
+
+        public List<string> ExportEvents()
+        {
+            return _events.Select(x => string.Join(";", x.TimeStamp.ToString(), x.Name)).ToList();
+        }
     }
 }

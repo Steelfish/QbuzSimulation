@@ -88,6 +88,36 @@ namespace QbuzzSimulation
             Console.WriteLine("Avg. waittime / passenger: {0}", _passengers.Average(p => p.WaitTime));
         }
 
+        public void Export(string outputPath)
+        {
+            var measurements = Path.Combine(outputPath, "measurements.txt");
+            var tramEventPath = Path.Combine(outputPath, "Debug/Trams");
+            if (!Directory.Exists(tramEventPath))
+                Directory.CreateDirectory(tramEventPath);
+
+            File.WriteAllLines(measurements, new []
+            {
+                $"Total Delay: {_delaysRoute1.Sum() + _delaysRoute2.Sum()}",
+                $"Total passenger wait time: {_passengers.Sum(p => p.WaitTime)}",
+                $"Total passengers: {_passengers.Count(p => p.Participated)}",
+                $"Avg. waittime / passenger: {_passengers.Average(p => p.WaitTime)}"
+            });
+
+            for(var i = 0; i < _trams.Count; i++)
+            {
+                var path = Path.Combine(tramEventPath, $"Tram{i}.csv");
+                using (var writer = new StreamWriter(path))
+                {
+                    writer.WriteLine("Timestap;Event name");
+                    foreach (var line in _trams[i].ExportEvents())
+                    {
+                        writer.WriteLine(line);
+                    }
+                }
+            }
+
+        }
+
         private void Operate(Tram tram, Event @event)
         {
             tram.ApplyChange(@event);
@@ -145,7 +175,6 @@ namespace QbuzzSimulation
                     else
                         ScheduleEvent(new TramEstimatedStartEvent(_time + tram.DeltaT), tram);
                     break;
-                //Note: tram.DeltaT = _q -> Redundant attribute turnaround time?
                 case TramChangeTrackEvent.Name:
                     if (tram.Route == 1 && _route1NextStart < _time + _q
                      || tram.Route == 2 && _route2NextStart < _time + _q)
@@ -157,10 +186,6 @@ namespace QbuzzSimulation
                         var extraTime = (tram.Route == 1 ? _route1NextStart : _route2NextStart) - _time - _q;
                         tram.TimeToSpare = extraTime;
                         ScheduleEvent(new TramEstimatedStartEvent(tram.Route == 1 ? _route1NextStart : _route2NextStart), tram);
-                        if (tram.Route == 1)
-                            _route1NextStart += 60 / _f * 60;
-                        else
-                            _route2NextStart += 60 / _f * 60;
                     }
                     if (tram.Route == 1)
                         _route1NextStart += 60 / _f * 60;

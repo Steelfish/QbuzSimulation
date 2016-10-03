@@ -11,11 +11,17 @@ namespace QbuzzSimulation
             //TODO Input van .csv's accepteren
             string filename = "input-data-passengers-01.csv";
             string path = Path.Combine(Environment.CurrentDirectory, @"Data\Input\", filename);
+            string outputPath = Path.Combine(Environment.CurrentDirectory, @"Data\Output");
+
+            if (!Directory.Exists(outputPath))
+                Directory.CreateDirectory(outputPath);
             string[][][][] input = LoadArtificialModel(path);
 
-            //Run simulatie met tijd = 12 uur, f = 5, q = 5, t = 1
+            //Run simulatie met tijd = 12 uur, f = 1, q = 5, t = 1
             var system = new System(43200, 1, 5, 1);
             system.Run();
+
+            system.Export(outputPath);
 
             //TODO output uit systeem events genereren
 

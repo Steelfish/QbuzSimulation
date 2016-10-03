@@ -58,7 +58,10 @@ namespace QbuzzSimulation
             }
             CalculateTimeToNextDestination();
             Driving = true;
-            Destination.Occupied.Remove(this);
+            if (Previous != null && Previous.IsEndPoint)
+                Previous.Occupied.Remove(this);
+            else 
+                Destination.Occupied.Remove(this);
             Previous = Destination;
             Destination = Destination.NextStop;
         }
