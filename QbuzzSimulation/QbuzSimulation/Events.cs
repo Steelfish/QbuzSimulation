@@ -45,6 +45,12 @@ namespace QbuzzSimulation
         public TramStartEvent(int time) : base(Name, time) { }
     }
 
+    public class TramStartWaitingEvent : Event
+    {
+        public new const string Name = "TramStartWaiting";
+        public TramStartWaitingEvent(int time) : base (Name, time) { }
+    }
+
     public class TramPassengersEnterEvent : Event
     {
         public new const string Name = "TramPassengersEnter";

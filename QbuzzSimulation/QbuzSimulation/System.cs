@@ -30,7 +30,7 @@ namespace QbuzzSimulation
 
         //Meetpunten
         private readonly List<int> _delaysRoute1 = new List<int>();
-        private readonly List<int> _delaysRoute2 = new List<int>(); 
+        private readonly List<int> _delaysRoute2 = new List<int>();
 
 
         public System(int maxTime, int f, int q, int t)
@@ -46,14 +46,19 @@ namespace QbuzzSimulation
         {
             for (var i = 0; i < _t; i++)
             {
-                var tram1 = new Tram(_route1, _q) { TimeToSpare = _route1NextStart };
-                var tram2 = new Tram(_route2, _q) { TimeToSpare = _route2NextStart };
+                var tram1 = new Tram(_route1) { TimeToSpare = _route1NextStart };
+                var tram2 = new Tram(_route2) { TimeToSpare = _route2NextStart };
                 _trams.Add(tram1);
                 _trams.Add(tram2);
                 ScheduleEvent(new TramEstimatedStartEvent(_route1NextStart), tram1);
                 ScheduleEvent(new TramEstimatedStartEvent(_route2NextStart), tram2);
                 _route1NextStart += 60 / _f * 60;
                 _route2NextStart += 60 / _f * 60;
+            }
+            for (var i = 0; i < _trams.Count; i++)
+            {
+                _trams[i].Ahead = _trams[Math.Abs((i - 2) % _trams.Count)];
+                _trams[i].Behind = _trams[Math.Abs((i + 2) % _trams.Count)];
             }
             _ridesRoute1 = 0;
             _ridesRoute2 = 0;
@@ -89,7 +94,7 @@ namespace QbuzzSimulation
             switch (@event.Name)
             {
                 case TramEstimatedStartEvent.Name:
-                    if (tram.DeltaT > 0 && tram.Destination.WaitList.Count == 0)
+                    if (tram.DeltaT > 0 && !tram.Behind.Waiting)
                     {
                         ScheduleEvent(new TramEstimatedStartEvent(_time + tram.DeltaT), tram);
                     }
@@ -97,38 +102,42 @@ namespace QbuzzSimulation
                     {
                         if (tram.Destination == _route1)
                         {
-                            _delaysRoute1.Add(_time - _ridesRoute1++ * 60/_f*60);
+                            _delaysRoute1.Add(_time - _ridesRoute1++ * 60 / _f * 60);
                         }
-                        else if(tram.Destination == _route2)
+                        else if (tram.Destination == _route2)
                         {
-                            _delaysRoute2.Add(_time - _ridesRoute2++ * 60/_f*60);
+                            _delaysRoute2.Add(_time - _ridesRoute2++ * 60 / _f * 60);
                         }
-                        //Should probably schedule TramStop.
+                        //Should probably schedule TramEstimatedStop.
                         ScheduleEvent(new TramStartEvent(_time), tram);
                     }
                     break;
-                    //Might be redundant.
+                //Might be redundant.
                 case TramStartEvent.Name:
                     ScheduleEvent(new TramEstimatedStopEvent(_time + tram.DeltaT), tram);
-                    var waitingTram = tram.Previous.WaitList.FirstOrDefault();
-                    if (waitingTram != null)
+                    if (tram.Behind.Waiting)
                     {
-                        //TODO 40 seconden wordt nu hier verwerkt. Moet eigenlijk in starten en stoppen van trams?
-                        ScheduleEvent(new TramStopEvent(_time + 40), tram);
-                        tram.Previous.WaitList.Remove(tram);
+                        ScheduleEvent(new TramStopEvent(_time + 40), tram.Behind);
                     }
                     break;
                 case TramEstimatedStopEvent.Name:
                     if (tram.ShouldStop)
                     {
-                        //TODO omgaan met eindpunten
-                       if (tram.Destination.Occupied)
-                            tram.Destination.WaitList.Add(tram);
-                       else
+                        if (tram.Destination.Occupied.Count > 0 &&
+                            (!tram.Destination.IsEndPoint || tram.Destination.Occupied.Count == 2))
+                        {
+                            ScheduleEvent(new TramStartWaitingEvent(_time + tram.DeltaT), tram);
+                        }
+                        else
                             ScheduleEvent(new TramStopEvent(_time + tram.DeltaT), tram);
                     }
                     else
                         ScheduleEvent(new TramStartEvent(_time + tram.DeltaT), tram);
+                    break;
+                case TramStartWaitingEvent.Name:
+                    if(tram.Ahead.Driving)
+                        //Todo how long should tram wait when tram it stopped for has already started driving?
+                        ScheduleEvent(new TramStopEvent(_time + 40), tram);
                     break;
                 case TramStopEvent.Name:
                     if (tram.AtEndPoint)
@@ -138,14 +147,14 @@ namespace QbuzzSimulation
                     break;
                 //Note: tram.DeltaT = _q -> Redundant attribute turnaround time?
                 case TramChangeTrackEvent.Name:
-                    if (tram.Route == 1 && _route1NextStart < _time + tram.DeltaT
-                     || tram.Route == 2 && _route2NextStart < _time + tram.DeltaT)
+                    if (tram.Route == 1 && _route1NextStart < _time + _q
+                     || tram.Route == 2 && _route2NextStart < _time + _q)
                     {
-                        ScheduleEvent(new TramEstimatedStartEvent(_time + tram.DeltaT), tram);
+                        ScheduleEvent(new TramEstimatedStartEvent(_time + _q), tram);
                     }
                     else
                     {
-                        var extraTime = (tram.Route == 1 ? _route1NextStart : _route2NextStart) - _time - tram.DeltaT;
+                        var extraTime = (tram.Route == 1 ? _route1NextStart : _route2NextStart) - _time - _q;
                         tram.TimeToSpare = extraTime;
                         ScheduleEvent(new TramEstimatedStartEvent(tram.Route == 1 ? _route1NextStart : _route2NextStart), tram);
                         if (tram.Route == 1)
@@ -154,9 +163,9 @@ namespace QbuzzSimulation
                             _route2NextStart += 60 / _f * 60;
                     }
                     if (tram.Route == 1)
-                        _route1NextStart += 60/_f*60;
+                        _route1NextStart += 60 / _f * 60;
                     else
-                        _route2NextStart += 60/_f*60;
+                        _route2NextStart += 60 / _f * 60;
                     break;
             }
 
@@ -166,40 +175,41 @@ namespace QbuzzSimulation
         private void InitializeRoute()
         {
             //TODO bereken exit probablility
-            var PRDeUithof = new TramStop { Name = "P+R De Uithof", AvgTimeToNextDestination = 110, Route = 1, ExitProbability = 0};
+            var PRDeUithof = new TramStop { Name = "P+R De Uithof", DistanceToNextStop = 600, AvgTimeToNextDestination = 110, Route = 1, ExitProbability = 0 };
             ScheduleEvent(new PassengerArrivalEvent(_time + PRDeUithof.InterArrivalTime), PRDeUithof);
-            var WKZ = new TramStop { Name = "WKZ", AvgTimeToNextDestination = 78, Route = 1, ExitProbability = 0.05};
+            var WKZ = new TramStop { Name = "WKZ", DistanceToNextStop = 600, AvgTimeToNextDestination = 78, Route = 1, ExitProbability = 0.05 };
             ScheduleEvent(new PassengerArrivalEvent(_time + WKZ.InterArrivalTime), WKZ);
-            var UMC = new TramStop { Name = "UMC", AvgTimeToNextDestination = 82, Route = 1, ExitProbability = 0.05};
+            var UMC = new TramStop { Name = "UMC", DistanceToNextStop = 400, AvgTimeToNextDestination = 82, Route = 1, ExitProbability = 0.05 };
             ScheduleEvent(new PassengerArrivalEvent(_time + UMC.InterArrivalTime), UMC);
-            var Heidelberglaan = new TramStop { Name = "Heidelberglaan", AvgTimeToNextDestination = 60, Route = 1, ExitProbability = 0.05};
+            var Heidelberglaan = new TramStop { Name = "Heidelberglaan", DistanceToNextStop = 400, AvgTimeToNextDestination = 60, Route = 1, ExitProbability = 0.05 };
             ScheduleEvent(new PassengerArrivalEvent(_time + Heidelberglaan.InterArrivalTime), Heidelberglaan);
-            var Padualaan = new TramStop { Name = "Padualaan", AvgTimeToNextDestination = 100, Route = 1, ExitProbability = 0.05};
+            var Padualaan = new TramStop { Name = "Padualaan", DistanceToNextStop = 800, AvgTimeToNextDestination = 100, Route = 1, ExitProbability = 0.05 };
             ScheduleEvent(new PassengerArrivalEvent(_time + Padualaan.InterArrivalTime), Padualaan);
-            var KrommeRijn = new TramStop { Name = "Kromme Rijn", AvgTimeToNextDestination = 59, Route = 1, ExitProbability = 0.1};
+            var KrommeRijn = new TramStop { Name = "Kromme Rijn", DistanceToNextStop = 600, AvgTimeToNextDestination = 59, Route = 1, ExitProbability = 0.1 };
             ScheduleEvent(new PassengerArrivalEvent(_time + KrommeRijn.InterArrivalTime), KrommeRijn);
-            var GalgenWaard = new TramStop { Name = "Galgenwaard", AvgTimeToNextDestination = 243, Route = 1, ExitProbability = 0.1};
+            var GalgenWaard = new TramStop { Name = "Galgenwaard", DistanceToNextStop = 3100, AvgTimeToNextDestination = 243, Route = 1, ExitProbability = 0.1 };
             ScheduleEvent(new PassengerArrivalEvent(_time + GalgenWaard.InterArrivalTime), GalgenWaard);
-            var VaartscheRijn = new TramStop { Name = "Vaartsche Rijn", AvgTimeToNextDestination = 135, Route = 1, ExitProbability = 0.1};
+            var VaartscheRijn = new TramStop { Name = "Vaartsche Rijn", DistanceToNextStop = 1400, AvgTimeToNextDestination = 135, Route = 1, ExitProbability = 0.1 };
             ScheduleEvent(new PassengerArrivalEvent(_time + VaartscheRijn.InterArrivalTime), VaartscheRijn);
-            var CentraalStation = new TramStop { Name = "Centraal Station", IsEndPoint = true, Route = 1, ExitProbability = 0.5};
+            var CentraalStation = new TramStop { Name = "Centraal Station", IsEndPoint = true, Route = 1, ExitProbability = 0.5 };
 
-            var CentraalStation2 = new TramStop { Name = "Centraal Station", AvgTimeToNextDestination = 134, Route = 2, ExitProbability = 0};
+            var CentraalStation2 = new TramStop { Name = "Centraal Station", DistanceToNextStop = 1400, AvgTimeToNextDestination = 134, Route = 2, ExitProbability = 0 };
             ScheduleEvent(new PassengerArrivalEvent(_time + CentraalStation2.InterArrivalTime), CentraalStation2);
-            var VaartscheRijn2 = new TramStop { Name = "Vaartsche Rijn", AvgTimeToNextDestination = 243, Route = 2, ExitProbability = 0.05};
+            var VaartscheRijn2 = new TramStop { Name = "Vaartsche Rijn", DistanceToNextStop = 3100, AvgTimeToNextDestination = 243, Route = 2, ExitProbability = 0.05 };
             ScheduleEvent(new PassengerArrivalEvent(_time + VaartscheRijn2.InterArrivalTime), VaartscheRijn2);
-            var GalgenWaard2 = new TramStop { Name = "Galgenwaard", AvgTimeToNextDestination = 59, Route = 2, ExitProbability = 0.1};
+            var GalgenWaard2 = new TramStop { Name = "Galgenwaard", DistanceToNextStop = 600, AvgTimeToNextDestination = 59, Route = 2, ExitProbability = 0.1 };
             ScheduleEvent(new PassengerArrivalEvent(_time + GalgenWaard2.InterArrivalTime), GalgenWaard2);
-            var KrommeRijn2 = new TramStop { Name = "Kromme Rijn", AvgTimeToNextDestination = 59, Route = 2, ExitProbability = 0.05};
+            var KrommeRijn2 = new TramStop { Name = "Kromme Rijn", DistanceToNextStop = 800, AvgTimeToNextDestination = 59, Route = 2, ExitProbability = 0.05 };
             ScheduleEvent(new PassengerArrivalEvent(_time + KrommeRijn2.InterArrivalTime), KrommeRijn2);
-            var Padualaan2 = new TramStop { Name = "Padualaan", AvgTimeToNextDestination = 100, Route = 2, ExitProbability = 0.3};
+            var Padualaan2 = new TramStop { Name = "Padualaan", DistanceToNextStop = 400, AvgTimeToNextDestination = 100, Route = 2, ExitProbability = 0.3 };
             ScheduleEvent(new PassengerArrivalEvent(_time + Padualaan2.InterArrivalTime), Padualaan2);
-            var Heidelberglaan2 = new TramStop { Name = "Heidelberglaan", AvgTimeToNextDestination = 60, Route = 2, ExitProbability = 0.2};
+            var Heidelberglaan2 = new TramStop { Name = "Heidelberglaan", DistanceToNextStop = 400, AvgTimeToNextDestination = 60, Route = 2, ExitProbability = 0.2 };
             ScheduleEvent(new PassengerArrivalEvent(_time + Heidelberglaan2.InterArrivalTime), Heidelberglaan2);
-            var UMC2 = new TramStop { Name = "UMC", AvgTimeToNextDestination = 82, Route = 2, ExitProbability = 0.1};
+            var UMC2 = new TramStop { Name = "UMC", DistanceToNextStop = 600, AvgTimeToNextDestination = 82, Route = 2, ExitProbability = 0.1 };
             ScheduleEvent(new PassengerArrivalEvent(_time + UMC2.InterArrivalTime), UMC2);
-            var WKZ2 = new TramStop { Name = "WKZ", AvgTimeToNextDestination = 78, Route = 2, ExitProbability = 0.1};
-            var PRDeUithof2 = new TramStop { Name = "P+R De Uithof", IsEndPoint = true, Route = 2, ExitProbability = 0.1};
+            var WKZ2 = new TramStop { Name = "WKZ", DistanceToNextStop = 600, AvgTimeToNextDestination = 78, Route = 2, ExitProbability = 0.1 };
+            ScheduleEvent(new PassengerArrivalEvent(_time + WKZ2.InterArrivalTime), WKZ2);
+            var PRDeUithof2 = new TramStop { Name = "P+R De Uithof", IsEndPoint = true, Route = 2, ExitProbability = 0.1 };
 
             PRDeUithof.NextStop = WKZ;
             WKZ.NextStop = UMC;
@@ -238,6 +248,8 @@ namespace QbuzzSimulation
             _eventList.RemoveAt(0);
             return e;
         }
+
+
     }
 
 }

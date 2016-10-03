@@ -19,8 +19,7 @@ namespace QbuzzSimulation
         public List<Passenger> Passengers = new List<Passenger>();
         public int Route { get; set; }
         public double ExitProbability { get; set; }
-        public bool Occupied { get; set; }
-        public List<Tram> WaitList { get; set; } 
+        public List<Tram> Occupied = new List<Tram>();
 
         //Todo change to distribution that changes over time
         public int InterArrivalTime => _r.Next(0, 20);
