@@ -2,64 +2,100 @@
 # This average per hour can then be used as the rate parameter to generate
 # interarrival times via a Poisson proces.
 
-
-# The bus data going from AZU, Heidelberglaan, De Kromme Rijn, Stadion Galgenwaard,
-#                         Rubenslaan, Sterrenwijk, Bleekstraat to CS Centrumzijde.
-bus_AZU_Centraal <- read.csv("Data/Input/12a.csv",
-                              header= TRUE, sep=";")
-
-# The bus data going from CS Centrumzijde, Bleekstraat, Sterrenwijk, Rubenslaan,
-#                         Stadion Galgenwaard, De Kromme Rijn, Heidelberglaan to AZU.
-bus_Centraal_AZU <- read.csv("Data/Input/12b.csv",
-                              header= TRUE, sep=";")
-
-
-# Remove unnecessary Trip information.
-bus_AZU_Centraal <- subset(bus_AZU_Centraal, select=-Trip)
-bus_Centraal_AZU <- subset(bus_Centraal_AZU, select=-Trip)
-
-# Sum all passenger arrivals within an hour per day.
-bus_AZU_Centraal <- aggregate(x = bus_AZU_Centraal[colnames(bus_AZU_Centraal[,3:ncol(bus_AZU_Centraal)])],
-                              FUN = sum,
-                              by = list(Date = bus_AZU_Centraal$Date,
-                                        Time = as.POSIXlt(strptime(bus_AZU_Centraal$Departure, format="%H:%M"))$hour)))
-
-# https://stackoverflow.com/questions/13649019/with-r-split-time-series-data-into-time-intervals-say-an-hour-and-then-plot-t
-
-
-# First sort by time and by date to have an ordering of days and their hours.
-# https://stackoverflow.com/questions/10683224/obtain-hour-from-datetime-vector
-bus_AZU_Centraal <- bus_AZU_Centraal[order(as.Date(bus_AZU_Centraal$Date, format="%d-%m-%Y"),
-                                           as.POSIXlt(bus_AZU_Centraal$Time, format="%H:%M"),,drop=FALSE]
-
+# 
+# # The bus data going from AZU, Heidelberglaan, De Kromme Rijn, Stadion Galgenwaard,
+# #                         Rubenslaan, Sterrenwijk, Bleekstraat to CS Centrumzijde.
+# bus_AZU_Centraal <- read.csv("Data/Input/12a.csv",
+#                               header= TRUE, sep=";")
+# 
+# # The bus data going from CS Centrumzijde, Bleekstraat, Sterrenwijk, Rubenslaan,
+# #                         Stadion Galgenwaard, De Kromme Rijn, Heidelberglaan to AZU.
+# bus_Centraal_AZU <- read.csv("Data/Input/12b.csv",
+#                               header= TRUE, sep=";")
+# 
+# 
+# # Remove unnecessary Trip information.
+# bus_AZU_Centraal <- subset(bus_AZU_Centraal, select=-Trip)
+# bus_Centraal_AZU <- subset(bus_Centraal_AZU, select=-Trip)
 # 
 # # Sum all passenger arrivals within an hour per day.
 # bus_AZU_Centraal <- aggregate(x = bus_AZU_Centraal[colnames(bus_AZU_Centraal[,3:ncol(bus_AZU_Centraal)])],
 #                               FUN = sum,
 #                               by = list(Date = bus_AZU_Centraal$Date,
-#                                         Hour = cut(as.POSIXct(bus_AZU_Centraal$Departure), format="%H%M", "hour")))
+#                                         Time = as.POSIXlt(strptime(bus_AZU_Centraal$Departure, format="%H:%M"))$hour)))
 # 
 # # https://stackoverflow.com/questions/13649019/with-r-split-time-series-data-into-time-intervals-say-an-hour-and-then-plot-t
 # 
 # 
 # # First sort by time and by date to have an ordering of days and their hours.
 # # https://stackoverflow.com/questions/10683224/obtain-hour-from-datetime-vector
-# bus_AZU_Centraal <- bus_AZU_Centraal[order(as.Date(bus_AZU_Centraal$Date,format="%d-%m-%Y"),
-#                                            as.POSIXlt(bus_AZU_Centraal$Hour, format="%H%M")),,drop=FALSE]
+# bus_AZU_Centraal <- bus_AZU_Centraal[order(as.Date(bus_AZU_Centraal$Date, format="%d-%m-%Y"),
+#                                            as.POSIXlt(bus_AZU_Centraal$Time, format="%H:%M"),,drop=FALSE]
+# 
+# # 
+# # # Sum all passenger arrivals within an hour per day.
+# # bus_AZU_Centraal <- aggregate(x = bus_AZU_Centraal[colnames(bus_AZU_Centraal[,3:ncol(bus_AZU_Centraal)])],
+# #                               FUN = sum,
+# #                               by = list(Date = bus_AZU_Centraal$Date,
+# #                                         Hour = cut(as.POSIXct(bus_AZU_Centraal$Departure), format="%H%M", "hour")))
+# # 
+# # # https://stackoverflow.com/questions/13649019/with-r-split-time-series-data-into-time-intervals-say-an-hour-and-then-plot-t
+# # 
+# # 
+# # # First sort by time and by date to have an ordering of days and their hours.
+# # # https://stackoverflow.com/questions/10683224/obtain-hour-from-datetime-vector
+# # bus_AZU_Centraal <- bus_AZU_Centraal[order(as.Date(bus_AZU_Centraal$Date,format="%d-%m-%Y"),
+# #                                            as.POSIXlt(bus_AZU_Centraal$Hour, format="%H%M")),,drop=FALSE]
+# 
+# 
+# # Remove unnecessary row names.
+# row.names(bus_AZU_Centraal) <- NULL
+# 
+# 
+# 
+# 
+# # The tram prognosis data in both directions.
+# tram <- read.csv("Data/Input/passengerprognose.csv",
+#                  header= FALSE, sep=";")
 
 
-# Remove unnecessary row names.
-row.names(bus_AZU_Centraal) <- NULL
+##########################################
+# Tram properties Nieuwegeinlijn fitting
+##########################################
+# The driving times for the tram on the Nieuwegein tram line.
+nieuwegein <- read.csv("Data/Input/runtimes.csv",
+                        header= TRUE, sep=";")
 
+# The average driving time per stop.
+averageNieuwegein <- colMeans(nieuwegein)
 
+# The driving times to Graadt van Roggenweg.
+graadt <- nieuwegein[,1]
 
+# Fit distributions
+#install.packages("MASS")
+library(MASS) ## loading package MASS
+fitdistr(graadt, "gamma") ## fitting gamma pdf parameters
+fitdistr(graadt, densfun=dweibull, start=list(scale=1, shape=2)) ## fitting Weibull pdf parameters
+fitdistr(graadt,"normal") ## fitting gaussian pdf parameters
 
-# The tram prognosis data in both directions.
-tram <- read.csv("Data/Input/passengerprognose.csv",
-                 header= FALSE, sep=";")
+# The pdf curve and histogram plotted together.
+h <- hist(graadt, breaks=15)
+xhist <- c(min(h$breaks), h$breaks)
+yhist <- c(0, h$density, 0)
+xfit <- seq(min(graadt), max(graadt), length=40)
+yfit <- dnorm(xfit, mean=mean(graadt), sd=sd(graadt))
+plot(xhist, yhist, type="s", ylim=c(0,max(yhist, yfit)), main="Normal pdf and
+     histogram")
+lines(xfit, yfit, col="red")
 
+# Kolmogorov-Smirnov goodness test
+ks.test(graadt,"pweibull", shape=2,scale=1)
 
-
+# Show true and approximated Weibull
+x <- seq(0, 2, 0.1)
+plot(x, pweibull(x, scale=1, shape=2), type="l", col="red", main="ECDF and Weibull CDF")
+plot(ecdf(graadt), add=TRUE)
 
 
 # # Distribution fitting
