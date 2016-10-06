@@ -24,6 +24,11 @@ namespace QbuzzSimulation
         //Todo change to distribution that changes over time
         public int InterArrivalTime => _r.Next(0, 20);
 
+        public int MaxQueueLength = 0;
+        private int QueueLengthOverTime = 0;
+        private int _lastEvent = 0;
+
+
         private void Apply(PassengerArrivalEvent @event)
         {
             if (IsEndPoint) throw new InvalidOperationException("Passengers can't arrive on an endpoint.");
@@ -38,7 +43,18 @@ namespace QbuzzSimulation
                 if (num < aggr)
                     break;
             }
+
+            QueueLengthOverTime += Passengers.Count*(@event.TimeStamp - _lastEvent);
             Passengers.Add(new Passenger(@event.TimeStamp, Name, stop.Name));
+            if (Passengers.Count > MaxQueueLength)
+                MaxQueueLength = Passengers.Count;
+            _lastEvent = @event.TimeStamp;
+        }
+
+        public int GetQueueLengthOverTime(int finalTime)
+        {
+            QueueLengthOverTime += Passengers.Count * (finalTime - _lastEvent);
+            return QueueLengthOverTime;
         }
 
         private double ProbabilityRemaining => NextStop?.ProbabilityRemaining + NextStop?.ExitProbability ?? 0;

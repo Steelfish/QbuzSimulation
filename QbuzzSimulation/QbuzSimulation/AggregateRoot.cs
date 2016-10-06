@@ -10,7 +10,7 @@ namespace QbuzzSimulation
     //Basis klasse om events op te slaan en de passende apply methode aan te roepen
     public abstract class AggregateRoot
     {
-        private readonly List<Event> _events = new List<Event>();
+        protected readonly List<Event> _events = new List<Event>();
         public readonly Guid Id = Guid.NewGuid();
 
         public void ApplyChange(Event @event)

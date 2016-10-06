@@ -10,6 +10,7 @@ namespace QbuzzSimulation
     {
         private readonly List<Tram> _trams = new List<Tram>();
         private readonly List<Passenger> _passengers = new List<Passenger>();
+        private readonly List<TramStop> _stops = new List<TramStop>(); 
         private List<ScheduledEvent> _eventList = new List<ScheduledEvent>();
 
         //Run input
@@ -80,42 +81,6 @@ namespace QbuzzSimulation
                 }
                 nextEvent = GetNextEvent();
             }
-
-            Console.WriteLine();
-            Console.WriteLine("Total Delay: {0}", _delaysRoute1.Sum() + _delaysRoute2.Sum());
-            Console.WriteLine("Total passenger wait time: {0}", _passengers.Sum(p => p.WaitTime));
-            Console.WriteLine("Total passengers: {0}", _passengers.Count(p => p.Participated));
-            Console.WriteLine("Avg. waittime / passenger: {0}", _passengers.Average(p => p.WaitTime));
-        }
-
-        public void Export(string outputPath)
-        {
-            var measurements = Path.Combine(outputPath, "measurements.txt");
-            var tramEventPath = Path.Combine(outputPath, "Debug/Trams");
-            if (!Directory.Exists(tramEventPath))
-                Directory.CreateDirectory(tramEventPath);
-
-            File.WriteAllLines(measurements, new []
-            {
-                $"Total Delay: {_delaysRoute1.Sum() + _delaysRoute2.Sum()}",
-                $"Total passenger wait time: {_passengers.Sum(p => p.WaitTime)}",
-                $"Total passengers: {_passengers.Count(p => p.Participated)}",
-                $"Avg. waittime / passenger: {_passengers.Average(p => p.WaitTime)}"
-            });
-
-            for(var i = 0; i < _trams.Count; i++)
-            {
-                var path = Path.Combine(tramEventPath, $"Tram{i}.csv");
-                using (var writer = new StreamWriter(path))
-                {
-                    writer.WriteLine("Timestap;Event name");
-                    foreach (var line in _trams[i].ExportEvents())
-                    {
-                        writer.WriteLine(line);
-                    }
-                }
-            }
-
         }
 
         private void Operate(Tram tram, Event @event)
@@ -181,39 +146,71 @@ namespace QbuzzSimulation
         {
             //TODO bereken exit probablility
             var PRDeUithof = new TramStop { Name = "P+R De Uithof", DistanceToNextStop = 600, AvgTimeToNextDestination = 110, Route = 1, ExitProbability = 0 };
+            _stops.Add(PRDeUithof);
             ScheduleEvent(new PassengerArrivalEvent(_time + PRDeUithof.InterArrivalTime), PRDeUithof);
+
             var WKZ = new TramStop { Name = "WKZ", DistanceToNextStop = 600, AvgTimeToNextDestination = 78, Route = 1, ExitProbability = 0.05 };
+            _stops.Add(WKZ);
             ScheduleEvent(new PassengerArrivalEvent(_time + WKZ.InterArrivalTime), WKZ);
+
             var UMC = new TramStop { Name = "UMC", DistanceToNextStop = 400, AvgTimeToNextDestination = 82, Route = 1, ExitProbability = 0.05 };
+            _stops.Add(UMC);
             ScheduleEvent(new PassengerArrivalEvent(_time + UMC.InterArrivalTime), UMC);
+
             var Heidelberglaan = new TramStop { Name = "Heidelberglaan", DistanceToNextStop = 400, AvgTimeToNextDestination = 60, Route = 1, ExitProbability = 0.05 };
+            _stops.Add(Heidelberglaan);
             ScheduleEvent(new PassengerArrivalEvent(_time + Heidelberglaan.InterArrivalTime), Heidelberglaan);
+
             var Padualaan = new TramStop { Name = "Padualaan", DistanceToNextStop = 800, AvgTimeToNextDestination = 100, Route = 1, ExitProbability = 0.05 };
+            _stops.Add(Padualaan);
             ScheduleEvent(new PassengerArrivalEvent(_time + Padualaan.InterArrivalTime), Padualaan);
+
             var KrommeRijn = new TramStop { Name = "Kromme Rijn", DistanceToNextStop = 600, AvgTimeToNextDestination = 59, Route = 1, ExitProbability = 0.1 };
+            _stops.Add(KrommeRijn);
             ScheduleEvent(new PassengerArrivalEvent(_time + KrommeRijn.InterArrivalTime), KrommeRijn);
+
             var GalgenWaard = new TramStop { Name = "Galgenwaard", DistanceToNextStop = 3100, AvgTimeToNextDestination = 243, Route = 1, ExitProbability = 0.1 };
+            _stops.Add(GalgenWaard);
             ScheduleEvent(new PassengerArrivalEvent(_time + GalgenWaard.InterArrivalTime), GalgenWaard);
+
             var VaartscheRijn = new TramStop { Name = "Vaartsche Rijn", DistanceToNextStop = 1400, AvgTimeToNextDestination = 135, Route = 1, ExitProbability = 0.1 };
+            _stops.Add(VaartscheRijn);
             ScheduleEvent(new PassengerArrivalEvent(_time + VaartscheRijn.InterArrivalTime), VaartscheRijn);
+
             var CentraalStation = new TramStop { Name = "Centraal Station", IsEndPoint = true, Route = 1, ExitProbability = 0.5 };
 
             var CentraalStation2 = new TramStop { Name = "Centraal Station", DistanceToNextStop = 1400, AvgTimeToNextDestination = 134, Route = 2, ExitProbability = 0 };
+            _stops.Add(CentraalStation2);
             ScheduleEvent(new PassengerArrivalEvent(_time + CentraalStation2.InterArrivalTime), CentraalStation2);
+
             var VaartscheRijn2 = new TramStop { Name = "Vaartsche Rijn", DistanceToNextStop = 3100, AvgTimeToNextDestination = 243, Route = 2, ExitProbability = 0.05 };
+            _stops.Add(VaartscheRijn2);
             ScheduleEvent(new PassengerArrivalEvent(_time + VaartscheRijn2.InterArrivalTime), VaartscheRijn2);
+
             var GalgenWaard2 = new TramStop { Name = "Galgenwaard", DistanceToNextStop = 600, AvgTimeToNextDestination = 59, Route = 2, ExitProbability = 0.1 };
+            _stops.Add(GalgenWaard2);
             ScheduleEvent(new PassengerArrivalEvent(_time + GalgenWaard2.InterArrivalTime), GalgenWaard2);
-            var KrommeRijn2 = new TramStop { Name = "Kromme Rijn", DistanceToNextStop = 800, AvgTimeToNextDestination = 59, Route = 2, ExitProbability = 0.05 };
+
+            var KrommeRijn2 = new TramStop { Name = "Kromme Rijn", DistanceToNextStop = 800, AvgTimeToNextDestination = 101, Route = 2, ExitProbability = 0.05 };
+            _stops.Add(KrommeRijn2);
             ScheduleEvent(new PassengerArrivalEvent(_time + KrommeRijn2.InterArrivalTime), KrommeRijn2);
-            var Padualaan2 = new TramStop { Name = "Padualaan", DistanceToNextStop = 400, AvgTimeToNextDestination = 100, Route = 2, ExitProbability = 0.3 };
+
+            var Padualaan2 = new TramStop { Name = "Padualaan", DistanceToNextStop = 400, AvgTimeToNextDestination = 60, Route = 2, ExitProbability = 0.3 };
+            _stops.Add(Padualaan2);
             ScheduleEvent(new PassengerArrivalEvent(_time + Padualaan2.InterArrivalTime), Padualaan2);
-            var Heidelberglaan2 = new TramStop { Name = "Heidelberglaan", DistanceToNextStop = 400, AvgTimeToNextDestination = 60, Route = 2, ExitProbability = 0.2 };
+
+            var Heidelberglaan2 = new TramStop { Name = "Heidelberglaan", DistanceToNextStop = 400, AvgTimeToNextDestination = 86, Route = 2, ExitProbability = 0.2 };
+            _stops.Add(Heidelberglaan2);
             ScheduleEvent(new PassengerArrivalEvent(_time + Heidelberglaan2.InterArrivalTime), Heidelberglaan2);
-            var UMC2 = new TramStop { Name = "UMC", DistanceToNextStop = 600, AvgTimeToNextDestination = 82, Route = 2, ExitProbability = 0.1 };
+
+            var UMC2 = new TramStop { Name = "UMC", DistanceToNextStop = 600, AvgTimeToNextDestination = 78, Route = 2, ExitProbability = 0.1 };
+            _stops.Add(UMC2);
             ScheduleEvent(new PassengerArrivalEvent(_time + UMC2.InterArrivalTime), UMC2);
-            var WKZ2 = new TramStop { Name = "WKZ", DistanceToNextStop = 600, AvgTimeToNextDestination = 78, Route = 2, ExitProbability = 0.1 };
+
+            var WKZ2 = new TramStop { Name = "WKZ", DistanceToNextStop = 600, AvgTimeToNextDestination = 113, Route = 2, ExitProbability = 0.1 };
+            _stops.Add(WKZ2);
             ScheduleEvent(new PassengerArrivalEvent(_time + WKZ2.InterArrivalTime), WKZ2);
+
             var PRDeUithof2 = new TramStop { Name = "P+R De Uithof", IsEndPoint = true, Route = 2, ExitProbability = 0.1 };
 
             PRDeUithof.NextStop = WKZ;
@@ -237,6 +234,93 @@ namespace QbuzzSimulation
             _route1 = PRDeUithof;
             _route2 = CentraalStation2;
         }
+
+        public void Export(string outputPath)
+        {
+            var measurements = Path.Combine(outputPath, "measurements.txt");
+            var drivingTimes = Path.Combine(outputPath, "drivingtimes.csv");
+            var tramEventPath = Path.Combine(outputPath, "Debug/Trams");
+            if (!Directory.Exists(tramEventPath))
+                Directory.CreateDirectory(tramEventPath);
+
+            //Tram stats
+            var delayPercentage1 = (double) _delaysRoute1.Where(x => x > 60).Sum() / (_delaysRoute1.Count + _delaysRoute2.Count);
+            var delayPercentage2 = (double) _delaysRoute2.Where(x => x > 60).Sum() / (_delaysRoute1.Count + _delaysRoute2.Count);
+            var delayPercentage = (delayPercentage1 + delayPercentage2)*100;
+            var avgDelay = (double) (_delaysRoute1.Sum() + _delaysRoute2.Sum()) / (_delaysRoute1.Count + _delaysRoute2.Count);
+            var maxDelay = _delaysRoute1.Max() > _delaysRoute2.Max() ? _delaysRoute1.Max() : _delaysRoute2.Max();
+            //Passengers stats
+            var passengers = _passengers.Where(p => p.Participated).ToList();
+            var pDelayPercentage = (double)passengers.Count(p => p.WaitTime > 300)/passengers.Count() * 100;
+            //Tramstop stats
+            var maxQueueLength = _stops.Max(x => x.MaxQueueLength);
+            var avgQueueLength = _stops.Sum(x => x.GetQueueLengthOverTime(_time))/_time/_stops.Count;
+            var stats = new[]
+            {
+                "TRAMS",
+                "",
+                $"% with more than 1 minute delay: {delayPercentage}",
+                $"Average delay: {avgDelay}",
+                $"Max delay: {maxDelay}",
+                "",
+                "PASSENGERS",
+                "",
+                $"% with more than 5 minute delay: {pDelayPercentage}",
+                $"Average delay: {passengers.Average(p => p.WaitTime)}",
+                $"Max delay: {passengers.Max(p => p.WaitTime)}",
+                "",
+                "STOPS",
+                "",
+                $"Max queue length: {maxQueueLength}",
+                $"Average queue length: {avgQueueLength}"
+            };
+
+            File.WriteAllLines(measurements, stats);
+            foreach(var stat in stats) Console.WriteLine(stat);
+
+            for (var i = 0; i < _trams.Count; i++)
+            {
+                var path = Path.Combine(tramEventPath, $"Tram{i}.csv");
+                using (var writer = new StreamWriter(path))
+                {
+                    writer.WriteLine("Timestap;Event name");
+                    foreach (var line in _trams[i].ExportEvents())
+                    {
+                        writer.WriteLine(line);
+                    }
+                }
+            }
+
+            var driveTimes = new List<List<int>>();
+            for (var i = 0; i < 16; i++)
+            {
+                driveTimes.Add(new List<int>());
+            }
+            foreach (var tram in _trams)
+            {
+                var index = tram.Route == 1 ? 0 : 8;
+                foreach (var times in tram.ExportDrivingTimes().Split(16))
+                {
+                    driveTimes[index].AddRange(times);
+                    index = (index + 1) % 16;
+                }
+            }
+            using (var writer = new StreamWriter(drivingTimes))
+            {
+                writer.WriteLine("Rijtijden vanaf halte:" + Environment.NewLine);
+                writer.WriteLine("P+R;WKZ;UMC;Heidelberglaan;Padualaan;Kromme Rijn;Galgenwaard;Vaartsche Rijn;Centraal Station;Vaartsche Rijn;Galgenwaard;Kromme Rijn;Padualaan;Heidelberglaan;UMC;WKZ");
+                for (var i = 0; i < driveTimes[1].Count; i++)
+                {
+                    var str = "";
+                    for (var j = 0; j < 16; j++)
+                    {
+                        str += (driveTimes[j].Count > i) ? driveTimes[j][i] + ";" : ";";
+                    }
+                    writer.WriteLine(str);
+                }
+            }
+        }
+
 
         private void ScheduleEvent(Event @event, AggregateRoot target)
         {

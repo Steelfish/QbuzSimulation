@@ -96,5 +96,19 @@ namespace QbuzzSimulation
             // Literature style delay calculation.
 //            return (int)(2.3E-5 * passengersTransfer * (passengersIn + passengersOut));
         }
+
+        public List<int> ExportDrivingTimes()
+        {
+            var result = new List<int>();
+            var t = 0;
+            foreach (var evt in _events)
+            {
+                if (evt is TramStartEvent)
+                    t = evt.TimeStamp;
+                if (evt is TramStopEvent)
+                    result.Add(evt.TimeStamp - t);
+            }
+            return result;
+        }
     }
 }

@@ -21,6 +21,7 @@ namespace QbuzzSimulation
             var system = new System(43200, 1, 5, 1);
             system.Run();
 
+            Console.WriteLine();
             system.Export(outputPath);
 
             //TODO output uit systeem events genereren
