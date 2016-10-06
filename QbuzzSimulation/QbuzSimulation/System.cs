@@ -46,8 +46,8 @@ namespace QbuzzSimulation
         {
             for (var i = 0; i < _t; i++)
             {
-                var tram1 = new Tram(_route1) { TimeToSpare = _route1NextStart };
-                var tram2 = new Tram(_route2) { TimeToSpare = _route2NextStart };
+                var tram1 = new Tram(_route1) { StartWaiting = _time };
+                var tram2 = new Tram(_route2) { StartWaiting = _time };
                 _trams.Add(tram1);
                 _trams.Add(tram2);
                 ScheduleEvent(new TramEstimatedStartEvent(_route1NextStart), tram1);
@@ -144,35 +144,16 @@ namespace QbuzzSimulation
                     break;
                 //Might be redundant.
                 case TramStartEvent.Name:
-                    ScheduleEvent(new TramEstimatedStopEvent(_time + tram.DeltaT), tram);
+                    ScheduleEvent(new TramStopEvent(_time + tram.DeltaT), tram);
                     if (tram.Behind.Waiting)
                     {
-                        ScheduleEvent(new TramStopEvent(_time + 40), tram.Behind);
+                        ScheduleEvent(new TramEstimatedStartEvent(_time + 40), tram.Behind);
                     }
-                    break;
-                case TramEstimatedStopEvent.Name:
-                    if (tram.ShouldStop)
-                    {
-                        if (tram.Destination.Occupied.Count > 0 &&
-                            (!tram.Destination.IsEndPoint || tram.Destination.Occupied.Count == 2))
-                        {
-                            ScheduleEvent(new TramStartWaitingEvent(_time + tram.DeltaT), tram);
-                        }
-                        else
-                            ScheduleEvent(new TramStopEvent(_time + tram.DeltaT), tram);
-                    }
-                    else
-                        ScheduleEvent(new TramStartEvent(_time + tram.DeltaT), tram);
-                    break;
-                case TramStartWaitingEvent.Name:
-                    if(tram.Ahead.Driving)
-                        //Todo how long should tram wait when tram it stopped for has already started driving?
-                        ScheduleEvent(new TramStopEvent(_time + 40), tram);
                     break;
                 case TramStopEvent.Name:
                     if (tram.AtEndPoint)
                         ScheduleEvent(new TramChangeTrackEvent(_time + tram.DeltaT, tram.Route == 1 ? _route2 : _route1), tram);
-                    else
+                    else if (!tram.Waiting)
                         ScheduleEvent(new TramEstimatedStartEvent(_time + tram.DeltaT), tram);
                     break;
                 case TramChangeTrackEvent.Name:
@@ -183,8 +164,7 @@ namespace QbuzzSimulation
                     }
                     else
                     {
-                        var extraTime = (tram.Route == 1 ? _route1NextStart : _route2NextStart) - _time - _q;
-                        tram.TimeToSpare = extraTime;
+                        tram.StartWaiting = _time;
                         ScheduleEvent(new TramEstimatedStartEvent(tram.Route == 1 ? _route1NextStart : _route2NextStart), tram);
                     }
                     if (tram.Route == 1)
