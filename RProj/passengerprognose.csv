@@ -1,0 +1,20 @@
+;Day 24u;;Morning peak 7-9 u;;Evening peak 16-18 u;
+halte;Entry passengers;Exit passengers;Entry passengers;Exit passengers;Entry passengers;Exit passengers
+P+R Uithof;15;0;1;0;7;0
+WKZ;1015;0;303;0;265;0
+UMC;2660;0;78;0;1197;0
+Heidelberglaan;9138;0;155;0;3300;0
+Padualaan;6855;236;99;103;2467;3
+Kromme Rijn;691;31;140;1;254;5
+Galgenwaard;606;265;52;27;292;67
+Vaartscherijn;1261;544;171;59;267;231
+Centraal Station Centrumzijde;0;21164;0;809;0;7741
+Centraal Station Centrumzijde;19994;0;8123;0;2132;0
+Vaartscherijn;2337;1735;956;294;322;295
+Galgenwaard;359;1288;180;305;26;228
+Kromme Rijn;47;1039;25;232;4;293
+Padualaan;10;9672;0;4551;9;718
+Heidelberglaan;8;5789;0;2531;7;501
+UMC;6;2577;0;1098;5;322
+WKZ;0;644;0;267;0;147
+P+R Uithof;0;15;0;7;0;1
