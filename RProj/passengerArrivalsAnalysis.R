@@ -5,17 +5,18 @@
 # The bus data going from AZU, Heidelberglaan, De Kromme Rijn, Stadion Galgenwaard,
 #                         Rubenslaan, Sterrenwijk, Bleekstraat to CS Centrumzijde.
 bus_AZU_Centraal <- read.csv("12a.csv",
-                              header= TRUE, sep=";")
+                              header=TRUE, sep=";")
 
 # The bus data going from CS Centrumzijde, Bleekstraat, Sterrenwijk, Rubenslaan,
 #                         Stadion Galgenwaard, De Kromme Rijn, Heidelberglaan to AZU.
 bus_Centraal_AZU <- read.csv("12b.csv",
-                              header= TRUE, sep=";")
+                              header=TRUE, sep=";")
 
 
 # Remove unnecessary Trip information.
 bus_AZU_Centraal <- subset(bus_AZU_Centraal, select=-Trip)
 bus_Centraal_AZU <- subset(bus_Centraal_AZU, select=-Trip)
+
 
 # Sum all passenger arrivals within an hour per day.
 bus_AZU_Centraal <- aggregate(x = bus_AZU_Centraal[colnames(bus_AZU_Centraal[,3:ncol(bus_AZU_Centraal)])],
@@ -29,7 +30,7 @@ bus_AZU_Centraal <- aggregate(x = bus_AZU_Centraal[colnames(bus_AZU_Centraal[,3:
 # First sort by time and by date to have an ordering of days and their hours.
 # https://stackoverflow.com/questions/10683224/obtain-hour-from-datetime-vector
 bus_AZU_Centraal <- bus_AZU_Centraal[order(as.Date(bus_AZU_Centraal$Date, format="%d-%m-%Y"),
-                                           as.POSIXlt(bus_AZU_Centraal$Time, format="%H:%M"),drop=FALSE)]
+                                           as.POSIXlt(bus_AZU_Centraal$Time, format="%H:%M"), drop=FALSE)]
 
 #
 # # Sum all passenger arrivals within an hour per day.
