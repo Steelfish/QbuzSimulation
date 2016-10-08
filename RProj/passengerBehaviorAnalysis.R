@@ -2,17 +2,6 @@
 #This average per hour can then be used as the rate parameter to generate
 #interarrival times via a Poisson proces.
 
-# The bus data going from AZU, Heidelberglaan, De Kromme Rijn, Stadion Galgenwaard,
-#                         Rubenslaan, Sterrenwijk, Bleekstraat to CS Centrumzijde.
-arrivals_AZU_Centraal <- read.csv("12a_entering.csv",
-                                  header=TRUE, sep=";")
-
-# The bus data going from CS Centrumzijde, Bleekstraat, Sterrenwijk, Rubenslaan,
-#                         Stadion Galgenwaard, De Kromme Rijn, Heidelberglaan to AZU.
-arrivals_Centraal_AZU <- read.csv("12b_entering.csv",
-                                  header=TRUE, sep=";")
-
-
 
 processBusData <- function(busData)
 {
@@ -46,6 +35,36 @@ processBusData <- function(busData)
 }
 
 
+# The bus data going from AZU, Heidelberglaan, De Kromme Rijn, Stadion Galgenwaard,
+#                         Rubenslaan, Sterrenwijk, Bleekstraat to CS Centrumzijde.
+arrivals_AZU_Centraal <- read.csv("12a_entering.csv",
+                                  header=TRUE, sep=";")
+
+# The bus data going from CS Centrumzijde, Bleekstraat, Sterrenwijk, Rubenslaan,
+#                         Stadion Galgenwaard, De Kromme Rijn, Heidelberglaan to AZU.
+arrivals_Centraal_AZU <- read.csv("12b_entering.csv",
+                                  header=TRUE, sep=";")
+
 
 arrivals_AZU_Centraal <- processBusData(arrivals_AZU_Centraal)
 arrivals_Centraal_AZU <- processBusData(arrivals_Centraal_AZU)
+
+
+
+#Fitting a distribution for the amount of passengers per hour.
+#This average per hour can then be used as the rate parameter to generate
+#interarrival times via a Poisson proces.
+
+# The bus data going from AZU, Heidelberglaan, De Kromme Rijn, Stadion Galgenwaard,
+#                         Rubenslaan, Sterrenwijk, Bleekstraat to CS Centrumzijde.
+destinations_AZU_Centraal <- read.csv("12a_leaving.csv",
+                                      header=TRUE, sep=";")
+
+# The bus data going from CS Centrumzijde, Bleekstraat, Sterrenwijk, Rubenslaan,
+#                         Stadion Galgenwaard, De Kromme Rijn, Heidelberglaan to AZU.
+destinations_Centraal_AZU <- read.csv("12b_leaving.csv",
+                                      header=TRUE, sep=";")
+
+
+destinations_AZU_Centraal <- processBusData(destinations_AZU_Centraal)
+destinations_Centraal_AZU <- processBusData(destinations_Centraal_AZU)
