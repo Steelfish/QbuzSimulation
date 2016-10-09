@@ -52,8 +52,7 @@ arrivals_Centraal_AZU <- processBusData(arrivals_Centraal_AZU)
 
 
 #Fitting a distribution for the amount of passengers per hour.
-#This average per hour can then be used as the rate parameter to generate
-#interarrival times via a Poisson proces.
+#This average per hour can then be used as the probability of having a stop as a destination.
 
 # The bus data going from AZU, Heidelberglaan, De Kromme Rijn, Stadion Galgenwaard,
 #                         Rubenslaan, Sterrenwijk, Bleekstraat to CS Centrumzijde.
@@ -68,3 +67,13 @@ destinations_Centraal_AZU <- read.csv("12b_leaving.csv",
 
 destinations_AZU_Centraal <- processBusData(destinations_AZU_Centraal)
 destinations_Centraal_AZU <- processBusData(destinations_Centraal_AZU)
+
+
+
+# Scale the entry and exit amounts by the tram passenger prognosis.
+prognosis_AZU_Centraal <- read.csv("passengerprognosea.csv",
+                                   header=TRUE, sep=";")
+
+prognosis_Centraal_AZU <- read.csv("passengerprognoseb.csv",
+                                   header=TRUE, sep=";")
+
