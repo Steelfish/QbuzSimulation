@@ -69,6 +69,15 @@ destinations_AZU_Centraal <- processBusData(destinations_AZU_Centraal)
 destinations_Centraal_AZU <- processBusData(destinations_Centraal_AZU)
 
 
+processTramPrognosisData <- function(tramPrognosisData)
+{
+        # Turn the 24 hour sum of passengers into an hourly average over
+        # the amount of hours in a transportation day (16).
+        tramPrognosisData$X24u_entry = tramPrognosisData$X24u_entry / 16
+        tramPrognosisData$X24u_exit = tramPrognosisData$X24u_exit / 16
+        
+        return(tramPrognosisData)
+}
 
 # Scale the entry and exit amounts by the tram passenger prognosis.
 prognosis_AZU_Centraal <- read.csv("passengerprognosea.csv",
@@ -76,4 +85,8 @@ prognosis_AZU_Centraal <- read.csv("passengerprognosea.csv",
 
 prognosis_Centraal_AZU <- read.csv("passengerprognoseb.csv",
                                    header=TRUE, sep=";")
+
+
+prognosis_AZU_Centraal <- processTramPrognosisData(prognosis_AZU_Centraal)
+prognosis_Centraal_AZU <- processTramPrognosisData(prognosis_Centraal_AZU)
 
