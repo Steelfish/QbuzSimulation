@@ -45,7 +45,7 @@ namespace QbuzzSimulation
             {
                 probabilities[i] = items[i] / total;
             }
-            
+
             int index = 0;
             float sum = probabilities[0];
             while (randomValue <= sum)
@@ -68,7 +68,7 @@ namespace QbuzzSimulation
             double randomValue = rnd.NextDouble();
 
             double number = -Math.Log(1.0f - randomValue) / rateParameter;
-            return number;
+            return (int)Math.Round(number, 0);
         }
     }
 }
