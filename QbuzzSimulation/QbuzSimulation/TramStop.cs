@@ -60,7 +60,7 @@ namespace QbuzzSimulation
         public int GetTimeToNextDestination()
         {
             int time = RandomDistribution.GenerateNextCauchy(AvgTimeToNextDestination, 4.0f);
-            return time;
+            return Math.Abs(time);
         }
 
         private double ProbabilityRemaining => NextStop?.ProbabilityRemaining + NextStop?.ExitProbability ?? 0;
