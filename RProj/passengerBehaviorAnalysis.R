@@ -90,3 +90,10 @@ prognosis_Centraal_AZU <- read.csv("passengerprognoseb.csv",
 prognosis_AZU_Centraal <- processTramPrognosisData(prognosis_AZU_Centraal)
 prognosis_Centraal_AZU <- processTramPrognosisData(prognosis_Centraal_AZU)
 
+
+
+write.csv(file="arrivals_AZU_Centraal.csv", x=arrivals_AZU_Centraal)
+write.csv(file="arrivals_Centraal_AZU.csv", x=arrivals_Centraal_AZU)
+write.csv(file="destinations_AZU_Centraal.csv", x=destinations_AZU_Centraal)
+write.csv(file="destinations_Centraal_AZU.csv", x=destinations_Centraal_AZU)
+

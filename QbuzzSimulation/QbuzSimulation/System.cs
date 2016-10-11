@@ -358,7 +358,7 @@ namespace QbuzzSimulation
             var routes = rates.Where(r => r.Route == stop.Route && r.TimeEnd == _time + 900 - _time % 900)
                     .SkipWhile(r => r.Name != stop.Name).Skip(1).ToArray();
             var destination = routes[RandomDistribution.GenerateNextEmpirical(routes.Select(r => r.RateOut).ToArray())].Name;
-            ScheduleEvent(new PassengerArrivalEvent((int) Math.Round(time), destination), stop);
+            ScheduleEvent(new PassengerArrivalEvent(time, destination), stop);
         }
 
         private void ScheduleEvent(Event @event, AggregateRoot target)

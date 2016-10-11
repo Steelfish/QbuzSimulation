@@ -4,6 +4,8 @@ namespace QbuzzSimulation
 {
     static class RandomDistribution
     {
+        public static Random rand = new Random();
+
         /// <summary>
         /// Generate a next Gaussian or normally distributed number based on a mean and standard deviation.
         /// </summary>
@@ -12,7 +14,6 @@ namespace QbuzzSimulation
         /// <returns></returns>
         public static double GenerateNextGaussian(double mean, double standardDeviation)
         {
-            Random rand = new Random();
             double u1 = rand.NextDouble();
             double u2 = rand.NextDouble();
 
@@ -59,15 +60,29 @@ namespace QbuzzSimulation
         }
 
         /// <summary>
+        /// Generate a next Chaucy number based on a location parameter mu and scale parameter c.
+        /// https://math.stackexchange.com/questions/484395/how-to-generate-a-cauchy-random-variable
+        /// </summary>
+        /// <param name="c"></param>
+        /// <param name="mu"></param>
+        /// <returns></returns>
+        public static int GenerateNextCauchy(float mu, float c)
+        {
+            double randomValue = rand.NextDouble();
+
+            double number = c * Math.Tan((randomValue - 0.5) * Math.PI) + mu;
+            return (int)Math.Round(number, 0);
+        }
+
+        /// <summary>
         /// Generate a next Poisson number based on an average rate parameter.
         /// http://preshing.com/20111007/how-to-generate-random-timings-for-a-poisson-process/
         /// </summary>
         /// <param name="rateParameter"></param>
         /// <returns></returns>
-        public static double GenerateNextPoisson(double rateParameter)
+        public static int GenerateNextPoisson(double rateParameter)
         {
-            Random rnd = new Random();
-            double randomValue = rnd.NextDouble();
+            double randomValue = rand.NextDouble();
 
             double number = -Math.Log(1.0f - randomValue) / rateParameter;
             return (int)Math.Round(number, 0);

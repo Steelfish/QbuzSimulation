@@ -39,6 +39,12 @@ namespace QbuzzSimulation
             QueueLengthOverTime += Passengers.Count * (finalTime - _lastEvent);
             return QueueLengthOverTime;
         }
+
+        public int GetTimeToNextDestination()
+        {
+            int time = RandomDistribution.GenerateNextCauchy(AvgTimeToNextDestination, 4.0f);
+            return Math.Abs(time);
+        }
     }
 }
 
