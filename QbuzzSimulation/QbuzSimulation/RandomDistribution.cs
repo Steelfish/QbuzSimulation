@@ -10,7 +10,7 @@ namespace QbuzzSimulation
         /// <param name="mean"></param>
         /// <param name="standardDeviation"></param>
         /// <returns></returns>
-        public static double GenerateNextGaussian(float mean, float standardDeviation)
+        public static double GenerateNextGaussian(double mean, double standardDeviation)
         {
             Random rand = new Random();
             double u1 = rand.NextDouble();
@@ -27,33 +27,35 @@ namespace QbuzzSimulation
         /// </summary>
         /// <param name="items"></param>
         /// <returns></returns>
-        public static double GenerateNextEmpirical(float[] items)
+        public static int GenerateNextEmpirical(double[] items)
         {
+            if (items.Length == 1)
+                return 0;
             Random rnd = new Random();
             double randomValue = rnd.NextDouble();
 
             int n = items.Length;
 
-            float total = 0;
-            foreach (float item in items)
+            double total = 0;
+            foreach (double item in items)
             {
                 total += item;
             }
 
-            float[] probabilities = new float[n];
+            double[] probabilities = new double[n];
             for (int i = 0; i < n; i++)
             {
                 probabilities[i] = items[i] / total;
             }
 
             int index = 0;
-            float sum = probabilities[0];
-            while (randomValue <= sum)
+            double sum = 0;
+            while (randomValue <= sum && index < n)
             {
-                index++;
                 sum += probabilities[index];
+                index++;
             }
-            return items[index];
+            return index;
         }
 
         /// <summary>
@@ -62,7 +64,7 @@ namespace QbuzzSimulation
         /// </summary>
         /// <param name="rateParameter"></param>
         /// <returns></returns>
-        public static double GenerateNextPoisson(float rateParameter)
+        public static double GenerateNextPoisson(double rateParameter)
         {
             Random rnd = new Random();
             double randomValue = rnd.NextDouble();
@@ -70,5 +72,7 @@ namespace QbuzzSimulation
             double number = -Math.Log(1.0f - randomValue) / rateParameter;
             return (int)Math.Round(number, 0);
         }
+
+
     }
 }

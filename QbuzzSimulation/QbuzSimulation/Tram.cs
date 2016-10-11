@@ -26,6 +26,8 @@ namespace QbuzzSimulation
         public Tram Ahead { get; set; }
         public Tram Behind { get; set; }
 
+        public int Index { get; set; }
+
         private List<Passenger> _passengers = new List<Passenger>();
 
         public Tram(TramStop start)
@@ -44,6 +46,7 @@ namespace QbuzzSimulation
 
         private void Apply(TramStartEvent @event)
         {
+            if (Driving) throw new InvalidOperationException("Can't start Tram that's already driving.");
             if (Destination.IsEndPoint) throw new InvalidOperationException("Can't start Tram on endpoint.");
             foreach (var passenger in _passengers.Where(p => p.Stop == Destination.Name))
             {
@@ -58,6 +61,7 @@ namespace QbuzzSimulation
             DeltaT = Destination.AvgTimeToNextDestination;
             Previous = Destination;
             Destination = Destination.NextStop;
+            Waiting = false;
         }
 
         private void Apply(TramStopEvent @event)
@@ -71,7 +75,7 @@ namespace QbuzzSimulation
             _passengers.AddRange(Destination.Passengers);
             Destination.Passengers.Clear();
             Destination.Occupied.Add(this);
-            Waiting = Destination.Occupied.Count > 1;
+            Waiting = (Destination.Occupied.Count > 1 && !Destination.IsEndPoint) || Destination.Occupied.Count > 2;
             if (Waiting)
                 StartWaiting = @event.TimeStamp;
         }
@@ -82,6 +86,9 @@ namespace QbuzzSimulation
             Previous = Destination;
             Destination = @event.NewRoute;
             DeltaT = 0;
+            //Uitstappen passagiers
+            _passengers = _passengers.Where(p => p.Destination != Destination.Name).ToList();
+            Driving = false;
         }
 
         private int CalculateStopDelay()

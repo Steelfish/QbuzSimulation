@@ -13,6 +13,9 @@ namespace QbuzzSimulation
         protected readonly List<Event> _events = new List<Event>();
         public readonly Guid Id = Guid.NewGuid();
 
+        private void Apply(Event @event) { }
+
+
         public void ApplyChange(Event @event)
         {
             ApplyChange(@event, true);
@@ -27,7 +30,7 @@ namespace QbuzzSimulation
 
         public List<string> ExportEvents()
         {
-            return _events.Select(x => string.Join(";", x.TimeStamp.ToString(), x.Name)).ToList();
+            return _events.Select(x => x.Export()).ToList();
         }
     }
 }

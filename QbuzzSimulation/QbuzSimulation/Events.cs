@@ -18,7 +18,17 @@ namespace QbuzzSimulation
     public class PassengerArrivalEvent : Event
     {
         public new const string Name = "PassengerArrival";
-        public PassengerArrivalEvent(int time): base(Name, time) { }
+        public string Destination { get; set; }
+
+        public PassengerArrivalEvent(int time, string destination) : base(Name, time)
+        {
+            Destination = destination;
+        }
+
+        public override string Export()
+        {
+            return string.Join(";", TimeStamp.ToString(), Name, Destination);
+        }
     }
 
     public class TramStopEvent : Event
@@ -30,7 +40,7 @@ namespace QbuzzSimulation
     public class TramEstimatedStartEvent : Event
     {
         public new const string Name = "TramEstimatedStart";
-        public TramEstimatedStartEvent(int time) : base(Name, time) {}
+        public TramEstimatedStartEvent(int time) : base(Name, time) { }
     }
 
     public class TramStartEvent : Event
@@ -56,6 +66,11 @@ namespace QbuzzSimulation
         }
     }
 
+    public class ArrivalRateChangeEvent : Event
+    {
+        public new const string Name = "ArrivalRateChange";
+        public ArrivalRateChangeEvent(int time) : base(Name, time) { }
+    }
     //TODO Meer events toevoegen in het systeem
 
     public abstract class Event
@@ -68,6 +83,11 @@ namespace QbuzzSimulation
         {
             Name = name;
             TimeStamp = time;
+        }
+
+        public virtual string Export()
+        {
+            return string.Join(";", TimeStamp.ToString(), Name);
         }
     }
 }
