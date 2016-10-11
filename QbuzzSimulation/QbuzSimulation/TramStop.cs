@@ -57,6 +57,12 @@ namespace QbuzzSimulation
             return QueueLengthOverTime;
         }
 
+        public int GetTimeToNextDestination()
+        {
+            int time = RandomDistribution.GenerateNextCauchy(AvgTimeToNextDestination, 4.0f);
+            return time;
+        }
+
         private double ProbabilityRemaining => NextStop?.ProbabilityRemaining + NextStop?.ExitProbability ?? 0;
         private int StopsRemaining => NextStop?.StopsRemaining + 1 ?? 0;
     }

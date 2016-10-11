@@ -55,7 +55,7 @@ namespace QbuzzSimulation
             else 
                 Destination.Occupied.Remove(this);
 
-            DeltaT = Destination.AvgTimeToNextDestination;
+            DeltaT = Destination.GetTimeToNextDestination();
             Previous = Destination;
             Destination = Destination.NextStop;
         }
