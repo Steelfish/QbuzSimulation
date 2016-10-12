@@ -27,8 +27,10 @@ namespace QbuzzSimulation
         private int _ridesRoute2;
         //P+R -> CS
         private TramStop _route1;
+        private TramStop _route1End;
         //CS -> P+R
         private TramStop _route2;
+        private TramStop _route2End;
 
         //Meetpunten
         private readonly List<int> _delaysRoute1 = new List<int>();
@@ -135,10 +137,12 @@ namespace QbuzzSimulation
                         if (tram.Destination == _route1)
                         {
                             _delaysRoute1.Add(_time - _ridesRoute1++ * 60 / _f * 60);
+                            _route1End.Occupied.Remove(tram);
                         }
                         else if (tram.Destination == _route2)
                         {
                             _delaysRoute2.Add(_time - _ridesRoute2++ * 60 / _f * 60);
+                            _route2End.Occupied.Remove(tram);
                         }
                         //Should probably schedule TramEstimatedStop.
                         ScheduleEvent(new TramStartEvent(_time), tram);
@@ -219,16 +223,19 @@ namespace QbuzzSimulation
             Heidelberglaan2.NextStop = UMC2;
             UMC2.NextStop = WKZ2;
             WKZ2.NextStop = PRDeUithof2;
+            
+            _route1 = PRDeUithof;
+            _route1End = CentraalStation;
+            _route2 = CentraalStation2;
+            _route2End = PRDeUithof2;
 
             var stop = PRDeUithof;
-            _route1 = PRDeUithof;
             while (!stop.IsEndPoint)
             {
                 _stops.Add(stop);
                 ScheduleNewArrivalEvent(stop);
                 stop = stop.NextStop;
             }
-            _route2 = CentraalStation2;
             stop = CentraalStation2;
             while (!stop.IsEndPoint)
             {

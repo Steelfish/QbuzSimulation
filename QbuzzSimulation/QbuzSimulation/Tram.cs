@@ -42,6 +42,7 @@ namespace QbuzzSimulation
             DeltaT = CalculateStopDelay() - (@event.TimeStamp - StartWaiting);
             _passengers.AddRange(Destination.Passengers);
             Destination.Passengers.Clear();
+            StartWaiting = @event.TimeStamp;
         }
 
         private void Apply(TramStartEvent @event)
@@ -89,6 +90,7 @@ namespace QbuzzSimulation
             //Uitstappen passagiers
             _passengers = _passengers.Where(p => p.Destination != Destination.Name).ToList();
             Driving = false;
+            Waiting = false;
         }
 
         private int CalculateStopDelay()
