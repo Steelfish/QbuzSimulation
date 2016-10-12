@@ -137,12 +137,18 @@ namespace QbuzzSimulation
                         if (tram.Destination == _route1)
                         {
                             _delaysRoute1.Add(_time - _ridesRoute1++ * 60 / _f * 60);
-                            _route1End.Occupied.Remove(tram);
+                            _route2End.Occupied.Remove(tram);
+                            var toStart = _route2End.Occupied.Where(t => t.Waiting).FirstOrDefault();
+                            if (toStart != null)
+                                ScheduleEvent(new TramChangeTrackEvent(_time + 40, _route1), toStart);
                         }
                         else if (tram.Destination == _route2)
                         {
                             _delaysRoute2.Add(_time - _ridesRoute2++ * 60 / _f * 60);
-                            _route2End.Occupied.Remove(tram);
+                            var removed = _route1End.Occupied.Remove(tram);
+                            var toStart = _route1End.Occupied.Where(t => t.Waiting).FirstOrDefault();
+                            if (toStart != null && removed)
+                                ScheduleEvent(new TramChangeTrackEvent(_time + 40, _route2), toStart);
                         }
                         //Should probably schedule TramEstimatedStop.
                         ScheduleEvent(new TramStartEvent(_time), tram);
@@ -151,17 +157,20 @@ namespace QbuzzSimulation
                 //Might be redundant.
                 case TramStartEvent.Name:
                     ScheduleEvent(new TramStopEvent(_time + tram.DeltaT), tram);
-                    if (tram.Behind.Waiting)
+                    if (tram.Behind.Waiting && !tram.Behind.AtEndPoint)
                     {
                         ScheduleEvent(new TramEstimatedStartEvent(_time + 40), tram.Behind);
                     }
                     break;
                 case TramStopEvent.Name:
                     //Todo tram waiting on end points
-                    if (tram.AtEndPoint)
-                        ScheduleEvent(new TramChangeTrackEvent(_time + tram.DeltaT, tram.Route == 1 ? _route2 : _route1), tram);
-                    else if (!tram.Waiting)
-                        ScheduleEvent(new TramEstimatedStartEvent(_time + tram.DeltaT), tram);
+                    if (!tram.Waiting)
+                    {
+                        if (tram.AtEndPoint)
+                            ScheduleEvent(new TramChangeTrackEvent(_time + tram.DeltaT, tram.Route == 1 ? _route2 : _route1), tram);
+                        else
+                            ScheduleEvent(new TramEstimatedStartEvent(_time + tram.DeltaT), tram);
+                    }
                     break;
                 case TramChangeTrackEvent.Name:
                     if (tram.Route == 1 && _route1NextStart < _time + _q
@@ -223,7 +232,7 @@ namespace QbuzzSimulation
             Heidelberglaan2.NextStop = UMC2;
             UMC2.NextStop = WKZ2;
             WKZ2.NextStop = PRDeUithof2;
-            
+
             _route1 = PRDeUithof;
             _route1End = CentraalStation;
             _route2 = CentraalStation2;
