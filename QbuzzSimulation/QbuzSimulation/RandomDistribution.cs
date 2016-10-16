@@ -75,6 +75,22 @@ namespace QbuzzSimulation
         }
 
         /// <summary>
+        /// Generate a next lognormal number based on a mean parameter mu and standard deviation parameter sigma.
+        /// https://en.wikipedia.org/wiki/Log-normal_distribution
+        /// </summary>
+        /// <param name="mu"></param>
+        /// <param name="sigma"></param>
+        /// <returns></returns>
+        public static int GenerateNextLognormal(float mu, float sigma)
+        {
+            double z = GenerateNextGaussian(0, 1);
+
+            double number = Math.Exp(mu + (sigma * z));
+            Console.WriteLine(number);
+            return (int)Math.Round(number, 0);
+        }
+
+        /// <summary>
         /// Generate a next Poisson number based on an average rate parameter.
         /// http://preshing.com/20111007/how-to-generate-random-timings-for-a-poisson-process/
         /// </summary>
