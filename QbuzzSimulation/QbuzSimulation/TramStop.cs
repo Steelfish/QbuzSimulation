@@ -42,7 +42,10 @@ namespace QbuzzSimulation
 
         public int GetTimeToNextDestination()
         {
-            int time = RandomDistribution.GenerateNextCauchy(AvgTimeToNextDestination, 4.0f);
+            // Use a Lognormal distribution to simulate driving times as per the fit on the Nieuwegeinlijn.
+            // The mean is set to the average driving time and the standard deviation is found to be 3.01% of the mean on average.
+            // The mean and standard deviation are logarithmic.
+            int time = RandomDistribution.GenerateNextLognormal((float)Math.Log(AvgTimeToNextDestination), (float)Math.Log(AvgTimeToNextDestination)*0.0301f);
             return Math.Abs(time);
         }
     }
