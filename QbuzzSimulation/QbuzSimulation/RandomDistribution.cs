@@ -51,12 +51,12 @@ namespace QbuzzSimulation
 
             int index = 0;
             double sum = 0;
-            while (randomValue <= sum && index < n)
+            while (randomValue >= sum && index < n)
             {
                 sum += probabilities[index];
                 index++;
             }
-            return index;
+            return index - 1;
         }
 
         /// <summary>

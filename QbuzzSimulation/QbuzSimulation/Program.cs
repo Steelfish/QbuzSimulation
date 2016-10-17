@@ -18,7 +18,7 @@ namespace QbuzzSimulation
             string[][][][] input = LoadArtificialModel(path);
             var table = PassengerRates.ConvertArtificialInput(input);
             //Run simulatie met tijd = 15.5 uur, f = 15, q = 5, t = 8
-            var system = new System(55800, 15, 5, 8, table);
+            var system = new System(55800, 4, 5, 16, table);
             system.Run();
 
             Console.WriteLine();

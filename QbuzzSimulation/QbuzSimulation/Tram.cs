@@ -76,7 +76,8 @@ namespace QbuzzSimulation
             _passengers.AddRange(Destination.Passengers);
             Destination.Passengers.Clear();
             Destination.Occupied.Add(this);
-            Waiting = (Destination.Occupied.Count > 1 && !Destination.IsEndPoint) || Destination.Occupied.Count > 2;
+            Waiting = (Destination.Occupied.Count > 1 && !Destination.IsEndPoint) || Destination.Occupied.Count > 2
+                      || (Ahead.Destination.Name == Destination.Name && Ahead.Driving);
             if (Waiting)
                 StartWaiting = @event.TimeStamp;
         }
