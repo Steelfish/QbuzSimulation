@@ -360,7 +360,7 @@ namespace QbuzzSimulation
         {
             var rates = _passengerRates.ToArray();
             var arrivalRate = rates.Where(r => r.Route == stop.Route && r.Name == stop.Name && r.TimeEnd == _time + 900 - _time % 900).First();
-            if (Math.Abs(arrivalRate.RateIn) < 0.01)
+            if (Math.Abs(arrivalRate.RateIn) < 0.0001)
             {
                 stop.GeneratingEvents = false;
                 return;
