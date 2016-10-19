@@ -8,6 +8,8 @@ processBusData <- function(busData)
     # Remove unnecessary Trip information.
     busData <- subset(busData, select=-Trip)
     
+    busData[,3:11] = lapply(busData[,3:11], as.numeric)
+    
     # Sum all passenger arrivals within an hour per day.
     busData <- aggregate(x = busData[colnames(busData[,3:ncol(busData)])],
                          FUN = sum,
