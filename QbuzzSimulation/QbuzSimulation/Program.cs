@@ -9,14 +9,23 @@ namespace QbuzzSimulation
         static void Main(string[] args)
         {
             //TODO Input van .csv's accepteren
-            string filename = "input-data-passengers-01.csv";
+            string filename = "input-data.csv";
+            //string filename = "input-data-passengers-01.csv";
+
             string path = Path.Combine(Environment.CurrentDirectory, @"Data\Input\", filename);
             string outputPath = Path.Combine(Environment.CurrentDirectory, @"Data\Output");
 
             if (!Directory.Exists(outputPath))
                 Directory.CreateDirectory(outputPath);
-            string[][][][] input = LoadArtificialModel(path);
-            var table = PassengerRates.ConvertArtificialInput(input);
+            // Every time period is from t:00:00 until t:59:59.
+            string[] periods = { "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21" };
+
+            string[][][][] input = LoadModel(path, periods);
+            var table = PassengerRates.ConvertInput(input);
+
+            //string[][][][] input = LoadArtificialModel(path);
+            //var table = PassengerRates.ConvertArtificialInput(input);
+
             //Run simulatie met tijd = 15.5 uur, f = 15, q = 5, t = 8
             var system = new System(55800, 4, 5, 16, table);
             system.Run();
@@ -29,7 +38,7 @@ namespace QbuzzSimulation
             Console.ReadLine();
         }
 
-        /// Load an artificial input model CSV file into the following structure:
+        /// Load an input model CSV file into the following structure:
         ///     stops   (all stops in the model, from P+R Uithof (0) to Centraal Station (8))
         ///         directions  (either 0 starting at P+R Uithof, or 1 starting at Centraal Station)
         ///             periods (the driving day from 6-21, where 0 corresponds with 6)
@@ -42,7 +51,7 @@ namespace QbuzzSimulation
         ///         periods = 9
         ///         passengers in/out = 1
         ///     model[3][1][9][1]
-        public static string[][][][] LoadArtificialModel(string path)
+        public static string[][][][] LoadModel(string path, string[] periods)
         {
             string[][] input = File.ReadAllLines(path).Select(l => l.Split(';').ToArray()).ToArray();
             // Skip the header row.
@@ -51,21 +60,6 @@ namespace QbuzzSimulation
             string[] stops = { "P+R Uithof", "WKZ", "UMC", "Heidelberglaan", "Padualaan", "Kromme Rijn", "Galgenwaard", "Vaartscherijn", "Centraal Station Centrumzijde" };
             // Direction 0 is from P+R Uithof to Centraal Station Centrumzijde, direction 1 is in the opposite direction.
             string[] directions = { "0", "1" };
-            // Every time period is from t:00:00 until t:59:59.
-            //string[] periods = {"6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21"};
-            //TODO all times mapped to:      To read passenger data for that timeslot
-            /** 6:
-                    6
-                7-8:
-                    7
-                9-15:
-                    9
-                16-17:
-                    16
-                18-21:
-                    18
-            **/
-            string[] periods = { "6", "7", "7", "9", "9", "9", "9", "9", "9", "9", "16", "16", "18", "18", "18", "18" };
 
             // Initialise an empty passenger model sorted by stops, then directions, then periods, and finally passengers in or out.
             string[][][][] model = new string[stops.Length][][][];
@@ -98,6 +92,21 @@ namespace QbuzzSimulation
                     }
                 }
             }
+
+            return model;
+        }
+
+
+        /// Load an artificial input model CSV file into the following structure:
+        ///     stops   (all stops in the model, from P+R Uithof (0) to Centraal Station (8))
+        ///         directions  (either 0 starting at P+R Uithof, or 1 starting at Centraal Station)
+        ///             periods (the driving day from 6-21, where 0 corresponds with 6)
+        ///                 passengers in/out   (either 0 for in, or 1 for out)           
+        public static string[][][][] LoadArtificialModel(string path)
+        {
+            string[] periods = { "6", "7", "7", "9", "9", "9", "9", "9", "9", "9", "16", "16", "18", "18", "18", "18" };
+
+            string[][][][] model = LoadModel(path, periods);
 
             return model;
         }

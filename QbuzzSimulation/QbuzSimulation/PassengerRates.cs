@@ -10,10 +10,10 @@ namespace QbuzzSimulation
 {
     public static class PassengerRates
     {
-        public static List<TramStopRate> ConvertArtificialInput(string[][][][] input)
+        public static List<TramStopRate> ConvertInput(string[][][][] input)
         {
             var result = new List<TramStopRate>();
-            var resultPeriodes = Enumerable.Range(0, 62).Select(x => (x + 1) * 900).ToArray();
+            var resultPeriods = Enumerable.Range(0, 62).Select(x => (x + 1) * 900).ToArray();
             string[] stops = { "P+R De Uithof", "WKZ", "UMC", "Heidelberglaan", "Padualaan", "Kromme Rijn", "Galgenwaard", "Vaartsche Rijn", "Centraal Station" };
             for (var i = 0; i < stops.Length; i++)
             {
@@ -31,17 +31,55 @@ namespace QbuzzSimulation
                         factor = 7200;
                     else
                         factor = 12600;
-                    while (period < 62 && resultPeriodes[period] <= j * 3600)
+                    while (period < 62 && resultPeriods[period] <= j * 3600)
                     {
-                        result.Add(new TramStopRate(stops[i], 1, double.Parse(input[i][0][j - 1][0]) / factor, double.Parse(input[i][0][j - 1][1]), resultPeriodes[period]));
-                        result.Add(new TramStopRate(stops[i], 2, double.Parse(input[i][1][j - 1][0]) / factor, double.Parse(input[i][1][j - 1][1]), resultPeriodes[period]));
+                        result.Add(new TramStopRate(stops[i], 1, double.Parse(input[i][0][j - 1][0]) / factor, double.Parse(input[i][0][j - 1][1]), resultPeriods[period]));
+                        result.Add(new TramStopRate(stops[i], 2, double.Parse(input[i][1][j - 1][0]) / factor, double.Parse(input[i][1][j - 1][1]), resultPeriods[period]));
+                        period++;
+                    }
+                }
+                while (period < 62)
+                {
+                    result.Add(new TramStopRate(stops[i], 1, double.Parse(input[i][0][15][0]) / 12600, double.Parse(input[i][0][15][1]), resultPeriods[period]));
+                    result.Add(new TramStopRate(stops[i], 2, double.Parse(input[i][1][15][0]) / 12600, double.Parse(input[i][1][15][1]), resultPeriods[period]));
+                    period++;
+                }
+            }
+            return result;
+        }
+
+        public static List<TramStopRate> ConvertArtificialInput(string[][][][] input)
+        {
+            var result = new List<TramStopRate>();
+            var resultPeriods = Enumerable.Range(0, 62).Select(x => (x + 1) * 900).ToArray();
+            string[] stops = { "P+R De Uithof", "WKZ", "UMC", "Heidelberglaan", "Padualaan", "Kromme Rijn", "Galgenwaard", "Vaartsche Rijn", "Centraal Station" };
+            for (var i = 0; i < stops.Length; i++)
+            {
+                var period = 0;
+                for (var j = 1; j <= 16; j++)
+                {
+                    double factor;
+                    if (i == 1)
+                        factor = 3600;
+                    else if (i <= 3)
+                        factor = 7200;
+                    else if (i <= 10)
+                        factor = 25200;
+                    else if (i <= 12)
+                        factor = 7200;
+                    else
+                        factor = 12600;
+                    while (period < 62 && resultPeriods[period] <= j * 3600)
+                    {
+                        result.Add(new TramStopRate(stops[i], 1, double.Parse(input[i][0][j - 1][0]) / factor, double.Parse(input[i][0][j - 1][1]), resultPeriods[period]));
+                        result.Add(new TramStopRate(stops[i], 2, double.Parse(input[i][1][j - 1][0]) / factor, double.Parse(input[i][1][j - 1][1]), resultPeriods[period]));
                         period++;
                     }
                 }
                 while(period < 62)
                 {
-                    result.Add(new TramStopRate(stops[i], 1, double.Parse(input[i][0][15][0]) / 12600, double.Parse(input[i][0][15][1]), resultPeriodes[period]));
-                    result.Add(new TramStopRate(stops[i], 2, double.Parse(input[i][1][15][0]) / 12600, double.Parse(input[i][1][15][1]), resultPeriodes[period]));
+                    result.Add(new TramStopRate(stops[i], 1, double.Parse(input[i][0][15][0]) / 12600, double.Parse(input[i][0][15][1]), resultPeriods[period]));
+                    result.Add(new TramStopRate(stops[i], 2, double.Parse(input[i][1][15][0]) / 12600, double.Parse(input[i][1][15][1]), resultPeriods[period]));
                     period++;
                 }
             }
