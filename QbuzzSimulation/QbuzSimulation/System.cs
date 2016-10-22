@@ -136,7 +136,7 @@ namespace QbuzzSimulation
                     {
                         if (tram.Destination == _route1)
                         {
-                            _delaysRoute1.Add(_time - _ridesRoute1++ * 60 / _f * 60);
+                            _delaysRoute1.Add(_time - (_ridesRoute1++ * (60 / _f * 60)));
                             _route2End.Occupied.Remove(tram);
                             var toStart = _route2End.Occupied.Where(t => t.Waiting).FirstOrDefault();
                             if (toStart != null)
@@ -144,7 +144,7 @@ namespace QbuzzSimulation
                         }
                         else if (tram.Destination == _route2)
                         {
-                            _delaysRoute2.Add(_time - _ridesRoute2++ * 60 / _f * 60);
+                            _delaysRoute2.Add(_time - (_ridesRoute2++ * (60 / _f * 60)));
                             var removed = _route1End.Occupied.Remove(tram);
                             var toStart = _route1End.Occupied.Where(t => t.Waiting).FirstOrDefault();
                             if (toStart != null && removed)
@@ -195,7 +195,6 @@ namespace QbuzzSimulation
         //Maakt route aan
         private void InitializeRoute()
         {
-            //TODO bereken exit probablility
             var PRDeUithof = new TramStop { Name = "P+R De Uithof", DistanceToNextStop = 600, AvgTimeToNextDestination = 110, Route = 1 };
             var WKZ = new TramStop { Name = "WKZ", DistanceToNextStop = 600, AvgTimeToNextDestination = 78, Route = 1 };
             var UMC = new TramStop { Name = "UMC", DistanceToNextStop = 400, AvgTimeToNextDestination = 82, Route = 1 };
@@ -268,6 +267,10 @@ namespace QbuzzSimulation
             //Tram stats
             var delayPercentage1 = (double)_delaysRoute1.Where(x => x > 60).Count() / (_delaysRoute1.Count + _delaysRoute2.Count);
             var delayPercentage2 = (double)_delaysRoute2.Where(x => x > 60).Count() / (_delaysRoute1.Count + _delaysRoute2.Count);
+            foreach (int i in _delaysRoute1)
+            {
+                Console.WriteLine(i);
+            }
             var delayPercentage = (delayPercentage1 + delayPercentage2) * 100;
             var avgDelay = (double)(_delaysRoute1.Sum() + _delaysRoute2.Sum()) / (_delaysRoute1.Count + _delaysRoute2.Count);
             var maxDelay = _delaysRoute1.Max() > _delaysRoute2.Max() ? _delaysRoute1.Max() : _delaysRoute2.Max();
@@ -290,6 +293,7 @@ namespace QbuzzSimulation
                 $"% with more than 5 minute delay: {pDelayPercentage}",
                 $"Average delay: {passengers.Average(p => p.WaitTime)}",
                 $"Max delay: {passengers.Max(p => p.WaitTime)}",
+                $"Passengers transported: {passengers.Count(p => p.Participated)}",
                 "",
                 "STOPS",
                 "",

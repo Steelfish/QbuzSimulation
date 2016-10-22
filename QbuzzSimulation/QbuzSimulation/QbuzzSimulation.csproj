@@ -83,6 +83,7 @@
     <None Include="Data\Input\12b.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Data\Input\input-data.csv" />
     <None Include="Data\Input\passengerprognose.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
