@@ -253,6 +253,31 @@ namespace QbuzzSimulation
             }
         }
 
+
+        public string Results()
+        {
+            //Tram stats
+            var delayPercentage1 = (double)_delaysRoute1.Where(x => x > 60).Count() / (_delaysRoute1.Count + _delaysRoute2.Count);
+            var delayPercentage2 = (double)_delaysRoute2.Where(x => x > 60).Count() / (_delaysRoute1.Count + _delaysRoute2.Count);
+            var delayPercentage = (delayPercentage1 + delayPercentage2) * 100;
+            var avgDelay = (double)(_delaysRoute1.Sum() + _delaysRoute2.Sum()) / (_delaysRoute1.Count + _delaysRoute2.Count);
+            var maxDelay = _delaysRoute1.Max() > _delaysRoute2.Max() ? _delaysRoute1.Max() : _delaysRoute2.Max();
+            //Passengers stats
+            var passengers = _passengers.Where(p => p.Participated).ToList();
+            var pDelayPercentage = (double)passengers.Count(p => p.WaitTime > 300) / passengers.Count() * 100;
+            //Tramstop stats
+            var maxQueueLength = _stops.Max(x => x.MaxQueueLength);
+            var avgQueueLength = _stops.Sum(x => x.GetQueueLengthOverTime(_time)) / _time / _stops.Count;
+
+            string statsCsv = delayPercentage.ToString() + ";" + avgDelay.ToString() + ";" + maxDelay.ToString() + ";" +
+                              pDelayPercentage.ToString() + ";" + passengers.Average(p => p.WaitTime).ToString() + ";" +
+                              passengers.Max(p => p.WaitTime).ToString() + ";" + passengers.Count(p => p.Participated).ToString() + ";" +
+                              maxQueueLength.ToString() + ";" + avgQueueLength.ToString();
+
+            return statsCsv;
+        }
+
+
         public void Export(string outputPath, string settings, int run)
         {
             var measurements = Path.Combine(outputPath, "measurements_" + settings + "_" + run.ToString() + ".txt");
@@ -290,9 +315,9 @@ namespace QbuzzSimulation
                 "",
                 "PASSENGERS",
                 "",
-                $"% with more than 5 minute delay: {pDelayPercentage}",
-                $"Average delay: {passengers.Average(p => p.WaitTime)}",
-                $"Max delay: {passengers.Max(p => p.WaitTime)}",
+                $"% with more than 5 minute waiting time: {pDelayPercentage}",
+                $"Average waiting time: {passengers.Average(p => p.WaitTime)}",
+                $"Max waiting time: {passengers.Max(p => p.WaitTime)}",
                 $"Passengers transported: {passengers.Count(p => p.Participated)}",
                 "",
                 "STOPS",
@@ -303,6 +328,7 @@ namespace QbuzzSimulation
 
             File.WriteAllLines(measurements, stats);
             foreach (var stat in stats) Console.WriteLine(stat);
+
 
             for (var i = 0; i < _trams.Count; i++)
             {

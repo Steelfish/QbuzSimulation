@@ -29,27 +29,36 @@ namespace QbuzzSimulation
             // All settings are an array of time, frequency, switching time q and the amount of trams per route.
             int[][] settings = new int[2][] { new int[] { 55800, 4, 5, 8 },
                                               new int[] { 55800, 4, 5, 4 } };
-
+      
             // Perform this amount of runs per setting.
             int numberOfRuns = 20;
 
+             
             foreach (int[] setting in settings)
             {
+                string[] results = new string[numberOfRuns];
+
+                int time = setting[0];
+                int frequency = setting[1];
+                int q = setting[2];
+                int trams = setting[3];
+                string settingString = time.ToString() + "-" + frequency.ToString() + "-" + q.ToString() + "-" + trams.ToString();
+
                 for (int run = 1; run <= numberOfRuns; run++)
                 {
-                    int time = setting[0];
-                    int frequency = setting[1];
-                    int q = setting[2];
-                    int trams = setting[3];
                     // Run with time = 15.5 hours, frequency = 15, q = 5, trams per route = 8
                     var system = new System(time, frequency, q, trams, table);
                     system.Run();
 
                     Console.WriteLine();
-                    string settingString = time.ToString() + "-" + frequency.ToString() + "-" + q.ToString() + "-" + trams.ToString();
                     system.Export(outputPath, settingString , run);
+                    results[run - 1] = system.Results();
                 }
+
+                var measurementsCsv = Path.Combine(outputPath, "measurements_" + settingString + ".csv");
+                File.WriteAllLines(measurementsCsv, results);
             }
+
             Console.ReadLine();
         }
 
