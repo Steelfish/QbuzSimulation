@@ -253,10 +253,10 @@ namespace QbuzzSimulation
             }
         }
 
-        public void Export(string outputPath)
+        public void Export(string outputPath, string settings, int run)
         {
-            var measurements = Path.Combine(outputPath, "measurements.txt");
-            var drivingTimes = Path.Combine(outputPath, "drivingtimes.csv");
+            var measurements = Path.Combine(outputPath, "measurements_" + settings + "_" + run.ToString() + ".txt");
+            var drivingTimes = Path.Combine(outputPath, "drivingtimes_" + settings + "_" + run.ToString() + ".csv");
             var tramEventPath = Path.Combine(outputPath, "Debug/Trams");
             var tramstopEventPath = Path.Combine(outputPath, "Debug/Tramstops");
             if (!Directory.Exists(tramEventPath))
@@ -306,7 +306,7 @@ namespace QbuzzSimulation
 
             for (var i = 0; i < _trams.Count; i++)
             {
-                var path = Path.Combine(tramEventPath, $"Tram{i}.csv");
+                var path = Path.Combine(tramEventPath, $"Tram{i}_" + settings + "_" + run.ToString() + ".csv");
                 using (var writer = new StreamWriter(path))
                 {
                     writer.WriteLine("Timestap;Event name");
@@ -319,7 +319,7 @@ namespace QbuzzSimulation
 
             foreach (var t in _stops)
             {
-                var path = Path.Combine(tramstopEventPath, $"{t.Name}_{t.Route}.csv");
+                var path = Path.Combine(tramstopEventPath, $"{t.Name}_{t.Route}_" + settings + "_" + run.ToString() + ".csv");
                 using (var writer = new StreamWriter(path))
                 {
                     writer.WriteLine("Timestap;Event name");
