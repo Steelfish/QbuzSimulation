@@ -86,7 +86,6 @@ namespace QbuzzSimulation
             double z = GenerateNextGaussian(0, 1);
 
             double number = Math.Exp(mu + (sigma * z));
-            Console.WriteLine(number);
             return (int)Math.Round(number, 0);
         }
 

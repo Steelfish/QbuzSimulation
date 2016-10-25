@@ -63,9 +63,9 @@ namespace QbuzzSimulation
             }
         }
 
-        public void Run()
+        public void Run(bool verbose=false)
         {
-            for (var i = 0; i < _t; i++)
+            for (var i = 0; i < _t / 2; i++)
             {
                 var tram1 = new Tram(_route1) { StartWaiting = _time };
                 var tram2 = new Tram(_route2) { StartWaiting = _time };
@@ -99,12 +99,12 @@ namespace QbuzzSimulation
                 var tram = nextEvent.Target as Tram;
                 if (tram != null)
                 {
-                    Operate(tram, nextEvent.Event);
+                    Operate(tram, nextEvent.Event, verbose);
                 }
                 var tramstop = nextEvent.Target as TramStop;
                 if (tramstop != null)
                 {
-                    tramstop.ApplyChange(nextEvent.Event);
+                    tramstop.ApplyChange(nextEvent.Event, verbose);
                     switch (nextEvent.Event.Name)
                     {
                         case PassengerArrivalEvent.Name:
@@ -122,9 +122,9 @@ namespace QbuzzSimulation
             }
         }
 
-        private void Operate(Tram tram, Event @event)
+        private void Operate(Tram tram, Event @event, bool verbose=false)
         {
-            tram.ApplyChange(@event);
+            tram.ApplyChange(@event, verbose);
             switch (@event.Name)
             {
                 case TramEstimatedStartEvent.Name:
@@ -292,7 +292,7 @@ namespace QbuzzSimulation
             //Tram stats
             var delayPercentage1 = (double)_delaysRoute1.Where(x => x > 60).Count() / (_delaysRoute1.Count + _delaysRoute2.Count);
             var delayPercentage2 = (double)_delaysRoute2.Where(x => x > 60).Count() / (_delaysRoute1.Count + _delaysRoute2.Count);
-            foreach (int i in _delaysRoute1)
+            foreach (int i in _delaysRoute1.Where(x => x > 60))
             {
                 Console.WriteLine(i);
             }
@@ -372,7 +372,7 @@ namespace QbuzzSimulation
             }
             using (var writer = new StreamWriter(drivingTimes))
             {
-                writer.WriteLine("Rijtijden vanaf halte:" + Environment.NewLine);
+                writer.WriteLine("Driving times from stop:" + Environment.NewLine);
                 writer.WriteLine("P+R;WKZ;UMC;Heidelberglaan;Padualaan;Kromme Rijn;Galgenwaard;Vaartsche Rijn;Centraal Station;Vaartsche Rijn;Galgenwaard;Kromme Rijn;Padualaan;Heidelberglaan;UMC;WKZ");
                 for (var i = 0; i < driveTimes[1].Count; i++)
                 {

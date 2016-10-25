@@ -26,9 +26,10 @@ namespace QbuzzSimulation
             //string[][][][] input = LoadArtificialModel(path);
             //var table = PassengerRates.ConvertArtificialInput(input);
 
-            // All settings are an array of time, frequency, switching time q and the amount of trams per route.
-            int[][] settings = new int[2][] { new int[] { 55800, 4, 5, 8 },
-                                              new int[] { 55800, 4, 5, 4 } };
+            // All settings are an array of time, frequency, switching time q and the amount of trams.
+            // 55800 seconds is 15.5 hours.
+            int[][] settings = new int[2][] { new int[] { 55800, 15, 300, 16 },
+                                              new int[] { 55800, 15, 300, 8 } };
       
             // Perform this amount of runs per setting.
             int numberOfRuns = 20;
@@ -46,9 +47,8 @@ namespace QbuzzSimulation
 
                 for (int run = 1; run <= numberOfRuns; run++)
                 {
-                    // Run with time = 15.5 hours, frequency = 15, q = 5, trams per route = 8
                     var system = new System(time, frequency, q, trams, table);
-                    system.Run();
+                    system.Run(false);
 
                     Console.WriteLine();
                     system.Export(outputPath, settingString , run);

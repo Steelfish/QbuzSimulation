@@ -16,14 +16,17 @@ namespace QbuzzSimulation
         private void Apply(Event @event) { }
 
 
-        public void ApplyChange(Event @event)
+        public void ApplyChange(Event @event, bool verbose=false)
         {
-            ApplyChange(@event, true);
+            ApplyChange(@event, true, verbose);
         }
 
-        protected void ApplyChange(Event @event, bool isNew)
+        protected void ApplyChange(Event @event, bool isNew, bool verbose=false)
         {
-            Console.WriteLine("Applying event {0} to {1}-{2} at {3}", @event.Name, GetType().Name, Id, @event.TimeStamp);
+            if (verbose)
+            {
+                Console.WriteLine("Applying event {0} to {1}-{2} at {3}", @event.Name, GetType().Name, Id, @event.TimeStamp);
+            }
             this.AsDynamic().Apply(@event);
             if(isNew) _events.Add(@event);
         }
