@@ -28,8 +28,14 @@ namespace QbuzzSimulation
 
             // All settings are an array of time, frequency, switching time q and the amount of trams.
             // 55800 seconds is 15.5 hours.
-            int[][] settings = new int[2][] { new int[] { 55800, 15, 300, 16 },
-                                              new int[] { 55800, 15, 300, 8 } };
+            int[][] settings = new int[8][] { new int[] { 55800, 15, 300, 2 },
+                                              new int[] { 55800, 15, 300, 10 },
+                                              new int[] { 55800, 15, 300, 12 },
+                                              new int[] { 55800, 15, 300, 14 },
+                                              new int[] { 55800, 15, 300, 16 },
+                                              new int[] { 55800, 15, 300, 18 },
+                                              new int[] { 55800, 15, 300, 20 },
+                                              new int[] { 55800, 15, 300, 22 } };
       
             // Perform this amount of runs per setting.
             int numberOfRuns = 20;

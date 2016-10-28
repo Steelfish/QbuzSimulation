@@ -71,7 +71,7 @@ namespace QbuzzSimulation
         public new const string Name = "ArrivalRateChange";
         public ArrivalRateChangeEvent(int time) : base(Name, time) { }
     }
-    //TODO Meer events toevoegen in het systeem
+
 
     public abstract class Event
     {

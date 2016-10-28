@@ -137,9 +137,9 @@ namespace QbuzzSimulation
                         if (tram.Destination == _route1)
                         {
                             _delaysRoute1.Add(_time - (_ridesRoute1++ * (60 / _f * 60)));
-                            _route2End.Occupied.Remove(tram);
+                            var removed = _route2End.Occupied.Remove(tram);
                             var toStart = _route2End.Occupied.Where(t => t.Waiting).FirstOrDefault();
-                            if (toStart != null)
+                            if (toStart != null && removed)
                                 ScheduleEvent(new TramChangeTrackEvent(_time + 40, _route1), toStart);
                         }
                         else if (tram.Destination == _route2)

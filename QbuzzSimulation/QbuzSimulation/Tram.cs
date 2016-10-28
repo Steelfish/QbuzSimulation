@@ -26,6 +26,8 @@ namespace QbuzzSimulation
         public Tram Ahead { get; set; }
         public Tram Behind { get; set; }
 
+        public int capacity = 160;
+
         public int Index { get; set; }
 
         private List<Passenger> _passengers = new List<Passenger>();
@@ -72,9 +74,13 @@ namespace QbuzzSimulation
             DeltaT = CalculateStopDelay();
             //Uitstappen passagiers
             _passengers = _passengers.Where(p => p.Destination != Destination.Name).ToList();
+            Console.WriteLine(Destination.Name);
+            Console.WriteLine(_passengers.Count());
             //Instappen nieuwe passagiers
-            _passengers.AddRange(Destination.Passengers);
-            Destination.Passengers.Clear();
+            int freeSpace = capacity - _passengers.Count();
+            int passengersIn = Destination.Passengers.Count() > freeSpace ? freeSpace : Destination.Passengers.Count();
+            _passengers.AddRange(Destination.Passengers.Take(passengersIn));
+            Destination.Passengers.RemoveRange(0, passengersIn);
             Destination.Occupied.Add(this);
             Waiting = (Destination.Occupied.Count > 1 && !Destination.IsEndPoint) || Destination.Occupied.Count > 2
                       || (Ahead.Destination.Name == Destination.Name && Ahead.Driving);
