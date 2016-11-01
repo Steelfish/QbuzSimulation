@@ -83,13 +83,27 @@
     <None Include="Data\Input\12b.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Data\Input\input-data-passengers-015.csv" />
-    <None Include="Data\Input\input-data-passengers-02.csv" />
-    <None Include="Data\Input\input-data-passengers-025.csv" />
-    <None Include="Data\Input\input-data-passengers-03.csv" />
-    <None Include="Data\Input\input-data-passengers-04.csv" />
-    <None Include="Data\Input\input-data-passengers-06.csv" />
-    <None Include="Data\Input\input-data.csv" />
+    <None Include="Data\Input\input-data-passengers-015.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Input\input-data-passengers-02.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Input\input-data-passengers-025.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Input\input-data-passengers-03.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Input\input-data-passengers-04.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Input\input-data-passengers-06.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Input\input-data.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Data\Input\passengerprognose.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -109,9 +123,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Data\Generated\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
