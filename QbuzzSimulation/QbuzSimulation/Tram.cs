@@ -42,7 +42,9 @@ namespace QbuzzSimulation
         {
             //Pick up any additional passengers that may have arrived
             DeltaT = CalculateStopDelay() - (@event.TimeStamp - StartWaiting);
-            _passengers.AddRange(Destination.Passengers);
+            int freeSpace = capacity - _passengers.Count();
+            int passengersIn = Destination.Passengers.Count() > freeSpace ? freeSpace : Destination.Passengers.Count();
+            _passengers.AddRange(Destination.Passengers.Take(passengersIn));
             Destination.Passengers.Clear();
             StartWaiting = @event.TimeStamp;
         }
@@ -74,8 +76,6 @@ namespace QbuzzSimulation
             DeltaT = CalculateStopDelay();
             //Uitstappen passagiers
             _passengers = _passengers.Where(p => p.Destination != Destination.Name).ToList();
-            Console.WriteLine(Destination.Name);
-            Console.WriteLine(_passengers.Count());
             //Instappen nieuwe passagiers
             int freeSpace = capacity - _passengers.Count();
             int passengersIn = Destination.Passengers.Count() > freeSpace ? freeSpace : Destination.Passengers.Count();

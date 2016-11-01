@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
+
 
 namespace QbuzzSimulation
 {
@@ -8,9 +10,7 @@ namespace QbuzzSimulation
     {
         static void Main(string[] args)
         {
-            //TODO Input van .csv's accepteren
             string filename = "input-data.csv";
-            //string filename = "input-data-passengers-01.csv";
 
             string path = Path.Combine(Environment.CurrentDirectory, @"Data\Input\", filename);
             string outputPath = Path.Combine(Environment.CurrentDirectory, @"Data\Output");
@@ -23,47 +23,110 @@ namespace QbuzzSimulation
             string[][][][] input = LoadModel(path, periods);
             var table = PassengerRates.ConvertInput(input);
 
-            //string[][][][] input = LoadArtificialModel(path);
-            //var table = PassengerRates.ConvertArtificialInput(input);
-
-            // All settings are an array of time, frequency, switching time q and the amount of trams.
-            // 55800 seconds is 15.5 hours.
-            int[][] settings = new int[8][] { new int[] { 55800, 15, 300, 2 },
-                                              new int[] { 55800, 15, 300, 10 },
-                                              new int[] { 55800, 15, 300, 12 },
-                                              new int[] { 55800, 15, 300, 14 },
-                                              new int[] { 55800, 15, 300, 16 },
-                                              new int[] { 55800, 15, 300, 18 },
-                                              new int[] { 55800, 15, 300, 20 },
-                                              new int[] { 55800, 15, 300, 22 } };
-      
-            // Perform this amount of runs per setting.
-            int numberOfRuns = 20;
-
-             
-            foreach (int[] setting in settings)
+            foreach (float rateMultiplier in new float[]{ 1.0f, 1.5f, 2.0f})
             {
-                string[] results = new string[numberOfRuns];
-
-                int time = setting[0];
-                int frequency = setting[1];
-                int q = setting[2];
-                int trams = setting[3];
-                string settingString = time.ToString() + "-" + frequency.ToString() + "-" + q.ToString() + "-" + trams.ToString();
-
-                for (int run = 1; run <= numberOfRuns; run++)
+                var multipliedTable = new List<TramStopRate>();
+                foreach (TramStopRate stopRate in table)
                 {
-                    var system = new System(time, frequency, q, trams, table);
-                    system.Run(false);
-
-                    Console.WriteLine();
-                    system.Export(outputPath, settingString , run);
-                    results[run - 1] = system.Results();
+                    TramStopRate multipliedStopRate = new TramStopRate(stopRate.Name, stopRate.Route,
+                                                                       stopRate.RateIn * rateMultiplier, stopRate.RateOut * rateMultiplier, stopRate.TimeEnd);
+                    multipliedTable.Add(multipliedStopRate);
                 }
 
-                var measurementsCsv = Path.Combine(outputPath, "measurements_" + settingString + ".csv");
-                File.WriteAllLines(measurementsCsv, results);
+
+                // All settings are an array of time, frequency, switching time q and the amount of trams.
+                // 55800 seconds is 15.5 hours.
+                int[] frequencies = { 3, 6, 9, 12, 15, 18, 21, 24, 27, 30 };
+                int[] amountOfTrams = { 8, 10, 12, 14, 16, 18, 20, 22 };
+
+                int[][] settings = new int[frequencies.Length * amountOfTrams.Length][];
+
+                for (int i = 0; i < frequencies.Length; i++)
+                {
+                    for (int j = 0; j < amountOfTrams.Length; j++)
+                    {
+                        settings[i * amountOfTrams.Length + j] = new int[] { 55800, frequencies[i], 300, amountOfTrams[j] };
+                    }
+                }
+
+                // Perform this amount of runs per setting.
+                int numberOfRuns = 20;
+
+
+                foreach (int[] setting in settings)
+                {
+                    string[] results = new string[numberOfRuns];
+
+                    int time = setting[0];
+                    int frequency = setting[1];
+                    int q = setting[2];
+                    int trams = setting[3];
+                    string settingString = rateMultiplier.ToString() + "_" + time.ToString() + "-" + frequency.ToString() + "-" + q.ToString() + "-" + trams.ToString();
+
+                    for (int run = 1; run <= numberOfRuns; run++)
+                    {
+                        var system = new System(time, frequency, q, trams, multipliedTable);
+                        system.Run(false);
+
+                        Console.WriteLine();
+                        system.Export(outputPath, settingString, run);
+                        results[run - 1] = system.Results();
+                    }
+
+                    var measurementsCsv = Path.Combine(outputPath, "measurements_" + settingString + ".csv");
+                    File.WriteAllLines(measurementsCsv, results);
+                }
             }
+
+
+            //string[] artificialFilenames = { "input-data-passengers-01.csv", "input-data-passengers-02.csv", "input-data-passengers-03.csv", "input-data-passengers-04.csv", "input-data-passengers-06.csv", "input-data-passengers-15.csv", "input-data-passengers-25.csv" };
+            //foreach (string artificialFilename in artificialFilenames)
+            //{
+            //    string[][][][] artificialInput = LoadArtificialModel(path);
+            //    var artificialTable = PassengerRates.ConvertArtificialInput(input);
+
+            //    // Settings for the artificial models.
+            //    int[] frequencies = { 9, 15 };
+            //    int[] amountOfTrams = { 10, 16 };
+
+            //    int[][] settings = new int[frequencies.Length * amountOfTrams.Length][];
+
+            //    for (int i = 0; i < frequencies.Length; i++)
+            //    {
+            //        for (int j = 0; j < amountOfTrams.Length; j++)
+            //        {
+            //            settings[i * amountOfTrams.Length + j] = new int[] { 55800, frequencies[i], 300, amountOfTrams[j] };
+            //        }
+            //    }
+
+            //    // Perform this amount of runs per setting.
+            //    int numberOfRuns = 20;
+
+
+            //    foreach (int[] setting in settings)
+            //    {
+            //        string[] results = new string[numberOfRuns];
+
+            //        int time = setting[0];
+            //        int frequency = setting[1];
+            //        int q = setting[2];
+            //        int trams = setting[3];
+            //        string settingString = time.ToString() + "-" + frequency.ToString() + "-" + q.ToString() + "-" + trams.ToString();
+
+            //        for (int run = 1; run <= numberOfRuns; run++)
+            //        {
+            //            var system = new System(time, frequency, q, trams, table);
+            //            system.Run(false);
+
+            //            Console.WriteLine();
+            //            system.Export(outputPath, settingString, run);
+            //            results[run - 1] = system.Results();
+            //        }
+
+            //        var measurementsCsv = Path.Combine(outputPath, artificialFilename.Remove(artificialFilename.Length - 4) + "_measurements_" + settingString + ".csv");
+            //        File.WriteAllLines(measurementsCsv, results);
+            //    }
+            //}
 
             Console.ReadLine();
         }

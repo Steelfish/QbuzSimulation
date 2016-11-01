@@ -139,7 +139,7 @@ namespace QbuzzSimulation
                             _delaysRoute1.Add(_time - (_ridesRoute1++ * (60 / _f * 60)));
                             var removed = _route2End.Occupied.Remove(tram);
                             var toStart = _route2End.Occupied.Where(t => t.Waiting).FirstOrDefault();
-                            if (toStart != null && removed)
+                            if (toStart != null && removed && _eventList.Where(e => e.Event.GetType() == typeof(TramChangeTrackEvent) && e.Target == toStart).Count() == 0)
                                 ScheduleEvent(new TramChangeTrackEvent(_time + 40, _route1), toStart);
                         }
                         else if (tram.Destination == _route2)
@@ -147,7 +147,7 @@ namespace QbuzzSimulation
                             _delaysRoute2.Add(_time - (_ridesRoute2++ * (60 / _f * 60)));
                             var removed = _route1End.Occupied.Remove(tram);
                             var toStart = _route1End.Occupied.Where(t => t.Waiting).FirstOrDefault();
-                            if (toStart != null && removed)
+                            if (toStart != null && removed && _eventList.Where(e => e.Event.GetType() == typeof(TramChangeTrackEvent) && e.Target == toStart).Count() == 0)
                                 ScheduleEvent(new TramChangeTrackEvent(_time + 40, _route2), toStart);
                         }
                         //Should probably schedule TramEstimatedStop.
@@ -163,10 +163,9 @@ namespace QbuzzSimulation
                     }
                     break;
                 case TramStopEvent.Name:
-                    //Todo tram waiting on end points
                     if (!tram.Waiting)
                     {
-                        if (tram.AtEndPoint)
+                        if (tram.AtEndPoint && _eventList.Where(e => e.Event.GetType() == typeof(TramChangeTrackEvent) && e.Target == tram).Count() == 0)
                             ScheduleEvent(new TramChangeTrackEvent(_time + tram.DeltaT, tram.Route == 1 ? _route2 : _route1), tram);
                         else
                             ScheduleEvent(new TramEstimatedStartEvent(_time + tram.DeltaT), tram);
@@ -292,10 +291,6 @@ namespace QbuzzSimulation
             //Tram stats
             var delayPercentage1 = (double)_delaysRoute1.Where(x => x > 60).Count() / (_delaysRoute1.Count + _delaysRoute2.Count);
             var delayPercentage2 = (double)_delaysRoute2.Where(x => x > 60).Count() / (_delaysRoute1.Count + _delaysRoute2.Count);
-            foreach (int i in _delaysRoute1.Where(x => x > 60))
-            {
-                Console.WriteLine(i);
-            }
             var delayPercentage = (delayPercentage1 + delayPercentage2) * 100;
             var avgDelay = (double)(_delaysRoute1.Sum() + _delaysRoute2.Sum()) / (_delaysRoute1.Count + _delaysRoute2.Count);
             var maxDelay = _delaysRoute1.Max() > _delaysRoute2.Max() ? _delaysRoute1.Max() : _delaysRoute2.Max();
